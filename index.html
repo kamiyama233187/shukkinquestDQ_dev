@@ -652,14 +652,13 @@ input{
 <div id="versionDisplay"></div>
 
 <script>
-  ...
-  document.getElementById("versionDisplay")
-    .textContent = "v" + APP_VERSION;
-</script>
-<script>
 const ADMIN_CODE = "3963233187";
 const STORAGE_KEY = "shukkinQuestData_v3";
 const APP_VERSION = "1.1.0";
+
+  document.getElementById("versionDisplay")
+    .textContent = "v" + APP_VERSION;
+
 const VERSION_HISTORY = [
   { version:"1.1.0", content:"すごろく実装準備開始" },
   { version:"1.0.2", content:"管理画面にバージョン履歴追加" },
