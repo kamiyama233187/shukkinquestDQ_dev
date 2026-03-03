@@ -214,6 +214,9 @@ const currentUser = state.currentUser || null;
 
 let devMode = state.devMode || false;
 
+let messageQueue = [];
+let isShowingMessage = false;
+
 if(!currentUser){
   alert("ログインしてからプレイしてください");
   location.href = "index.html";
@@ -541,6 +544,24 @@ if(type === "boss"){
 
 function showMessage(text, type="normal"){
 
+  messageQueue.push({text, type});
+
+  if(!isShowingMessage){
+    processMessageQueue();
+  }
+}
+
+function processMessageQueue(){
+
+  if(messageQueue.length === 0){
+    isShowingMessage = false;
+    return;
+  }
+
+  isShowingMessage = true;
+
+  const {text, type} = messageQueue.shift();
+
   const box = document.getElementById("dqMessage");
 
   box.innerHTML = text;
@@ -559,6 +580,7 @@ function showMessage(text, type="normal"){
 
   setTimeout(()=>{
     box.style.display = "none";
+    processMessageQueue();
   },2500);
 }
 
