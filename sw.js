@@ -1,5 +1,4 @@
-const CACHE_VERSION = "v1.2.1";   // ← 更新ごとに上げる
-const CACHE_NAME = "shukkin-quest-dev-1" + CACHE_VERSION;
+const CACHE_NAME = "shukkin-quest-dev";
 
 const FILES_TO_CACHE = [
   "./",
@@ -16,7 +15,7 @@ const FILES_TO_CACHE = [
   "./levelup.mp3"
 ];
 
-// インストール時にキャッシュ
+// インストール
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
@@ -25,7 +24,7 @@ self.addEventListener("install", event => {
   );
 });
 
-// 古いキャッシュ削除
+// 有効化
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -39,7 +38,7 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// ネット優先 → 失敗したらキャッシュ
+// ネット優先
 self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(event.request)
@@ -51,6 +50,4 @@ self.addEventListener("fetch", event => {
       })
       .catch(() => caches.match(event.request))
   );
-
 });
-

@@ -2566,8 +2566,9 @@ playCursor();
 
   document.getElementById(id).classList.remove("hidden");
 }
+
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("sw.js?v=" + APP_VERSION);
 }
 
 function getNextLevelRequirement(total){
