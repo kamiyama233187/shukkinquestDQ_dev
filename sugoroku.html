@@ -159,6 +159,7 @@ button:active{
 </div>
 
 <div class="window center">
+ステージ：<span id="stageNum">1</span><br>
   現在位置：<span id="pos">0</span> マス<br>
 
   周回数：<span id="laps">0</span><br><br>
@@ -306,9 +307,15 @@ function startMove(roll, emp, today){
 
     // 🎯 ゴール処理
     if(state.sugoroku.position >= 30){
-
       state.sugoroku.position = 0;
       state.sugoroku.laps += 1;
+state.sugoroku.stage += 1;
+
+if(state.sugoroku.stage > 3){
+  state.sugoroku.stage = 1;
+}
+
+generateMap();
 
       if(!emp.sugorokuLaps){
         emp.sugorokuLaps = 0;
@@ -395,6 +402,9 @@ if(state.sugoroku.hp <= 0){
 
 function render(){
 
+document.getElementById("stageNum").textContent =
+  state.sugoroku.stage;
+
   document.getElementById("pos").textContent =
     state.sugoroku.position;
 
@@ -476,7 +486,7 @@ function generateMap(){
 
     const rand = Math.random();
 
- if(rand < 0.18){
+if(rand < 0.18){
   state.sugoroku.tiles.push("plus");
 }
 else if(rand < 0.28){
@@ -486,10 +496,10 @@ else if(rand < 0.33){
   state.sugoroku.tiles.push("rare");
 }
 else if(rand < 0.38){
-  state.sugoroku.tiles.push("boss"); // ←追加
+  state.sugoroku.tiles.push("heal");
 }
-else if(rand < 0.38){
-  state.sugoroku.tiles.push("heal"); // ←追加
+else if(rand < 0.43){
+  state.sugoroku.tiles.push("boss");
 }
 else{
   state.sugoroku.tiles.push("none");
@@ -596,8 +606,22 @@ if(state.sugoroku.hp < 0){
   save();
 render();
 }
+
+if(type === "heal"){
+
+  state.sugoroku.hp += 15;
+
+  if(state.sugoroku.hp > state.sugoroku.maxHp){
+    state.sugoroku.hp = state.sugoroku.maxHp;
+  }
+
+  showMessage("❤ HPが15回復した！");
+
+  save();
+  render();
 }
 
+}
 
 function showMessage(text, type="normal"){
 
