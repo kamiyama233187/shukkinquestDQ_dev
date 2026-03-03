@@ -184,7 +184,6 @@ function render(){
       tile.classList.add("goal");
     }
 
-    // 👇 ここがイベント表示部分
     const type = state.sugoroku.tiles[i];
 
     if(i === 29){
@@ -200,9 +199,12 @@ function render(){
       tile.textContent = "★";
     }
     else{
-      tile
+      tile.textContent = i;
+    }
 
-render();
+    map.appendChild(tile);
+  }
+}
 
 function generateMap(){
 
@@ -248,6 +250,8 @@ function handleEvent(type){
 
 }
 
+generateMap();
+render();
 </script>
 </body>
 </html>
