@@ -7,6 +7,26 @@
 
 <style>
 
+.bossWin {
+  animation: bossWinFlash 0.6s ease-in-out 2;
+}
+
+@keyframes bossWinFlash {
+  0%   { background:black; }
+  50%  { background:red; }
+  100% { background:black; }
+}
+
+.bossLose {
+  animation: bossLoseFlash 0.6s ease-in-out 2;
+}
+
+@keyframes bossLoseFlash {
+  0%   { background:black; }
+  50%  { background:#330000; }
+  100% { background:black; }
+}
+
 .rareFlash {
   animation: rareFlashAnim 0.6s ease-in-out 2;
 }
@@ -328,6 +348,9 @@ document.getElementById("laps").textContent =
     else if(type === "rare"){
       tile.textContent = "★";
     }
+else if(type === "boss"){
+  tile.textContent = "⚔";
+}
     else{
       tile.textContent = i;
     }
@@ -358,18 +381,21 @@ function generateMap(){
 
     const rand = Math.random();
 
-    if(rand < 0.2){
-      state.sugoroku.tiles.push("plus");
-    }
-    else if(rand < 0.3){
-      state.sugoroku.tiles.push("minus");
-    }
-    else if(rand < 0.35){
-      state.sugoroku.tiles.push("rare");
-    }
-    else{
-      state.sugoroku.tiles.push("none");
-    }
+ if(rand < 0.18){
+  state.sugoroku.tiles.push("plus");
+}
+else if(rand < 0.28){
+  state.sugoroku.tiles.push("minus");
+}
+else if(rand < 0.33){
+  state.sugoroku.tiles.push("rare");
+}
+else if(rand < 0.38){
+  state.sugoroku.tiles.push("boss"); // ←追加
+}
+else{
+  state.sugoroku.tiles.push("none");
+}
   }
 }
 
@@ -432,6 +458,40 @@ if(type === "rare"){
       showMessage("⭐ レアマス！30ポイント獲得！", "rare");
     }
   }
+}
+
+if(type === "boss"){
+
+  const chance = Math.random();
+
+  if(chance < 0.6){
+
+    emp.totalPoints += 80;
+    emp.totalEarned += 80;
+
+    document.body.classList.add("bossWin");
+
+    showMessage("⚔ ボス撃破！80ポイント獲得！", "rare");
+
+    setTimeout(()=>{
+      document.body.classList.remove("bossWin");
+    },800);
+
+  }else{
+
+    emp.totalPoints -= 20;
+    if(emp.totalPoints < 0) emp.totalPoints = 0;
+
+    document.body.classList.add("bossLose");
+
+    showMessage("💀 ボスに敗北…20ポイント減少");
+
+    setTimeout(()=>{
+      document.body.classList.remove("bossLose");
+    },800);
+  }
+
+  save();
 }
 
 }
