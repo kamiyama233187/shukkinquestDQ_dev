@@ -342,6 +342,19 @@ function startMove(roll, emp, today){
 
     render();
 
+// 💀 HP0チェック
+if(state.sugoroku.hp <= 0){
+
+  showMessage("💀 力尽きた…拠点へ戻される");
+
+  state.sugoroku.position = 0;
+  state.sugoroku.hp = state.sugoroku.maxHp;
+
+  render();
+  save();
+  return;
+}
+
  if(steps >= roll){
 
   clearInterval(moveInterval);
@@ -420,9 +433,6 @@ else if(type === "boss"){
 
     map.appendChild(tile);
   }
-}
-
-const tools = document.getElementById("devTools");
 
 // HPバー更新
 const hpPercent =
@@ -432,6 +442,9 @@ const hpBar = document.getElementById("hpBar");
 if(hpBar){
   hpBar.style.width = hpPercent + "%";
 }
+}
+
+const tools = document.getElementById("devTools");
 
 if(devMode){
   tools.style.display = "block";
