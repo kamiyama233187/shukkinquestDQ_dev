@@ -97,6 +97,16 @@ button:active{
 
 <div id="dqMessage" class="window center" style="display:none;"></div>
 
+<div id="devTools" style="display:none; margin-top:10px;">
+
+  <input type="number" id="devSteps" placeholder="移動数" style="width:80px;">
+  <button onclick="devRoll()">指定移動</button>
+
+  <button onclick="forceGoal()">強制ゴール</button>
+  <button onclick="warpTo(29)">29へワープ</button>
+
+</div>
+
 <div class="center">
   <button onclick="location.href='index.html'">
     もどる
@@ -144,48 +154,76 @@ function rollDice(){
 
   const today = todayStr();
 
-  if(state.sugoroku.lastPlayDate === today){
-    alert("今日はもうプレイできない！");
-    return;
-  }
+ if(!devMode && state.sugoroku.lastPlayDate === today){
+  showMessage("今日はもうプレイできない！");
+  return;
+}
 
   const roll = Math.floor(Math.random()*6)+1;
 
-  state.sugoroku.position += roll;
+  let steps = 0;
 
-const tileType =
-  state.sugoroku.tiles[state.sugoroku.position];
-handleEvent(tileType);
+  const moveInterval = setInterval(()=>{
 
-if(state.sugoroku.position >= 30){
+    state.sugoroku.position += 1;
+    steps++;
 
-  state.sugoroku.position = 0;
-  state.sugoroku.laps += 1;
+    // 🎯 ゴール処理
+    if(state.sugoroku.position >= 30){
 
-  if(currentUser && state.employees[currentUser]){
+      state.sugoroku.position = 0;
+      state.sugoroku.laps += 1;
 
-    // 1周ボーナス
-    state.employees[currentUser].totalPoints += 50;
-    state.employees[currentUser].totalEarned += 50;
+      // 🔥 従業員ごとの周回数も記録
+      if(currentUser && state.employees[currentUser]){
 
-    // 🔥 3周ボーナス
-    if(state.sugoroku.laps === 3 && !state.sugoroku.bonus3Claimed){
-      state.employees[currentUser].totalPoints += 100;
-      state.employees[currentUser].totalEarned += 100;
+        if(!state.employees[currentUser].sugorokuLaps){
+          state.employees[currentUser].sugorokuLaps = 0;
+        }
 
-state.sugoroku.bonus3Claimed = true;
+        state.employees[currentUser].sugorokuLaps += 1;
 
-      showMessage("🌟 3周達成！100ポイントボーナス！");
+        // 🏆 1周ボーナス
+        state.employees[currentUser].totalPoints += 50;
+        state.employees[currentUser].totalEarned += 50;
+
+        // 🌟 3周一度きりボーナス
+        if(state.sugoroku.laps === 3 && !state.sugoroku.bonus3Claimed){
+
+          state.employees[currentUser].totalPoints += 100;
+          state.employees[currentUser].totalEarned += 100;
+
+          state.sugoroku.bonus3Claimed = true;
+
+          showMessage("🌟 3周達成！100ポイントボーナス！");
+        }
+
+        // 🔥 5周称号（安全）
+        if(state.employees[currentUser].sugorokuLaps === 5){
+          // giveTitle は index 側で判定するのが理想だが
+          // 念のためここでも呼べる構造にするなら削除可
+        }
+      }
+
+      showMessage("🏆 ゴール！1周達成！");
     }
-  }
 
-  showMessage("🏆 ゴール！1周達成！");
-}
+    render();
 
-  state.sugoroku.lastPlayDate = today;
+    if(steps >= roll){
 
-  save();
-  render();
+      clearInterval(moveInterval);
+
+      const tileType =
+        state.sugoroku.tiles[state.sugoroku.position];
+
+      handleEvent(tileType);
+
+      state.sugoroku.lastPlayDate = today;
+      save();
+    }
+
+  }, 250); // ← 速度（200〜300で調整可）
 }
 
 function render(){
@@ -230,9 +268,14 @@ function render(){
       tile.textContent = i;
     }
 
+if(devMode){
+  document.getElementById("devTools").style.display = "block";
+}
+
     map.appendChild(tile);
   }
 }
+
 
 function generateMap(){
 
@@ -336,6 +379,49 @@ function showMessage(text){
   setTimeout(()=>{
     box.style.display = "none";
   },2000);
+}
+
+function checkSugorokuTitles(code){
+
+  const emp = state.employees[code];
+  if(!emp) return;
+
+  const laps = emp.sugorokuLaps || 0;
+
+  if(laps >= 5){
+    giveTitle(code, "sugoroku5");
+  }
+}
+
+function devRoll(){
+
+  const val = parseInt(
+    document.getElementById("devSteps").value
+  );
+
+  if(isNaN(val)) return;
+
+  state.sugoroku.position += val;
+
+  if(state.sugoroku.position >= 30){
+    state.sugoroku.position = 0;
+    state.sugoroku.laps += 1;
+  }
+
+  render();
+  save();
+}
+
+function forceGoal(){
+  state.sugoroku.position = 29;
+  render();
+  save();
+}
+
+function warpTo(num){
+  state.sugoroku.position = num;
+  render();
+  save();
 }
 
 generateMap();

@@ -661,13 +661,18 @@ const APP_VERSION = "1.1.0";
 
 const VERSION_HISTORY = [
   {
+    version:"1.2.0",
+    date:"2026-03-03",
+    content:["すごろく基本機能実装"]
+  },
+  {
     version:"1.1.0",
-    date:"2026-03-05",
+    date:"2026-03-03",
     content:["すごろく実装準備開始"]
   },
   {
     version:"1.0.2",
-    date:"2026-03-04",
+    date:"2026-03-02",
     content:["管理画面にバージョン履歴追加"]
   },
   {
@@ -761,6 +766,36 @@ const TITLE_MASTER = {
     type:"night",
     rarity:"SSR"
   },
+
+  /* ===== すごろく系 ===== */
+
+sugoroku5:{
+  name:"盤上の勇者",
+  description:"すごろくを5周達成した証。",
+  type:"sugoroku",
+  rarity:"R"
+},
+
+sugoroku20:{
+  name:"盤上の覇者",
+  description:"すごろくを20周達成した。",
+  type:"sugoroku",
+  rarity:"SR"
+},
+
+sugoroku50:{
+  name:"盤上の支配者",
+  description:"すごろくを50周達成した伝説級の存在。",
+  type:"sugoroku",
+  rarity:"SSR"
+},
+
+sugoroku100:{
+  name:"盤上の神",
+  description:"すごろくを100周制覇した究極の勇者。",
+  type:"sugoroku",
+  rarity:"UR"
+},
 
   /* ===== 隠し称号 ===== */
 
@@ -889,7 +924,7 @@ function load(){
     save();
   }
 
-  // ===== 不足データ補完 =====
+  // ===== 不足データ補完（保険） =====
   if(!state.rewards) state.rewards = [];
   if(!state.shiftTable) state.shiftTable = {};
   if(!state.shiftOverrides) state.shiftOverrides = {};
@@ -917,6 +952,13 @@ function load(){
   if(!state.today || state.today.date !== todayStr()){
     resetToday(false);
   }
+}
+
+if(!state.sugoroku){
+  state.sugoroku = {
+    position:0,
+    laps:0
+  };
 }
 
 function ensureTodayRecord(code){
@@ -1005,6 +1047,7 @@ if(now.getHours() === 7 && now.getMinutes() === 0){
 }
 
   showEmployee();   // ← 先に画面切り替え
+checkSugorokuTitles(code);
 
   if(!isShiftDay()){
     showDQMessage("きょうは やすみのひ だった！");
@@ -1924,10 +1967,15 @@ const arr = Object.entries(state.employees)
     code,
     name:emp.name,
     pt:emp.totalPoints||0,
-    laps: state.sugoroku?.laps || 0
+    laps: emp.sugorokuLaps || 0
   }))
 
-    .sort((a,b)=>b.pt-a.pt)
+    .sort((a,b)=>{
+  if(b.pt !== a.pt){
+    return b.pt - a.pt;
+  }
+  return b.laps - a.laps;
+})
     .slice(0,3);
 
   arr.forEach((e,i)=>{
@@ -1969,6 +2017,7 @@ row.innerHTML = `
     <div class="${rarityClass}" style="font-size:12px;">
       【${titleText}】
     </div>
+
     <span class="badge">${e.pt}pt</span>
 <div style="font-size:12px;">
   🎲 ${e.laps}周
@@ -1987,13 +2036,19 @@ function renderEmployeeRanking(){
 
   container.innerHTML="";
 
-  const arr = Object.entries(state.employees)
-    .map(([code,emp])=>({
-      code,
-      name:emp.name,
-      pt:emp.totalPoints||0
-    }))
-    .sort((a,b)=>b.pt-a.pt);
+const arr = Object.entries(state.employees)
+  .map(([code,emp])=>({
+    code,
+    name:emp.name,
+    pt:emp.totalPoints||0,
+    laps: emp.sugorokuLaps || 0
+  }))
+       .sort((a,b)=>{
+  if(b.pt !== a.pt){
+    return b.pt - a.pt;
+  }
+  return b.laps - a.laps;
+})
 
   arr.forEach((e,i)=>{
 
@@ -2043,6 +2098,9 @@ function renderEmployeeRanking(){
           【${titleText}】
         </div>
         <span class="badge">${e.pt}pt</span>
+<div style="font-size:12px;">
+  🎲 ${e.laps}周
+</div>
       </div>
     `;
 
@@ -2828,6 +2886,30 @@ function renderVersionInfo(){
 
     list.appendChild(box);
   });
+}
+
+function checkSugorokuTitles(code){
+
+  const emp = state.employees[code];
+  if(!emp) return;
+
+  const laps = emp.sugorokuLaps || 0;
+
+  if(laps >= 5){
+    giveTitle(code, "sugoroku5");
+  }
+
+  if(laps >= 20){
+    giveTitle(code, "sugoroku20");
+  }
+
+  if(laps >= 50){
+    giveTitle(code, "sugoroku50");
+  }
+
+  if(laps >= 100){
+    giveTitle(code, "sugoroku100");
+  }
 }
 
 </script>
