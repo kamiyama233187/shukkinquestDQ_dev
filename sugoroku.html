@@ -854,15 +854,6 @@ if(type === "branch"){
 }
 
 
-  if(choice){
-    state.sugoroku.position = 15;
-  }else{
-    state.sugoroku.position = 11;
-  }
-
-  render();
-  save();
-}
 
 if(type === "boss"){
 
@@ -1083,6 +1074,24 @@ function getNextLevelRequirement(total){
   return getRequiredExp(info.level + 1);
 }
 
+function chooseBranch(index){
+
+  if(!currentBranch) return;
+
+  const nextPos = currentBranch.next[index];
+
+  if(nextPos === undefined) return;
+
+  state.sugoroku.position = nextPos;
+
+  document.getElementById("branchUI").style.display = "none";
+
+  currentBranch = null;
+
+  render();
+  save();
+
+}
 
  // バージョン
 const version = localStorage.getItem("appVersion");
