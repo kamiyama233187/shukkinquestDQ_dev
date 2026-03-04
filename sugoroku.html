@@ -90,6 +90,12 @@
   font-size:12px;
 }
 
+.player{
+  position:absolute;
+  font-size:20px;
+  pointer-events:none;
+}
+
 .active{
   background:white;
   color:black;
@@ -191,7 +197,10 @@ Lv：<span id="level">1</span><br>
 
   <button onclick="rollDice()">サイコロを振る</button>
 
-<div id="map" class="map"></div>
+<div class="map">
+  <div id="map"></div>
+  <div id="player" class="player">🧍</div>
+</div>
 
 </div>
 
@@ -247,6 +256,15 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 const currentUser = state.currentUser || null;
 
 let currentBranch = null;
+if(!state.player){
+  state.player = {
+    avatar:"🧍",
+    hair:0,
+    face:0,
+    body:0,
+    armor:0
+  };
+}
 
 const STAGE_DATA = {
   1: {
@@ -535,8 +553,9 @@ for(let i=0;i<length;i++){
     tile.className = "tile";
 
     if(i === state.sugoroku.position){
-      tile.classList.add("active");
-    }
+  tile.classList.add("active");
+  tile.textContent = state.player.avatar;
+}
 
     if(i === state.sugoroku.tiles.length - 1){
       tile.classList.add("goal");
@@ -580,6 +599,7 @@ else if(type === "heal"){
 
 tile.style.left = (i % 6) * 50 + "px";
 tile.style.top = Math.floor(i / 6) * 50 + "px";
+
     map.appendChild(tile);
   }
 
@@ -594,6 +614,19 @@ if(hpBar){
 }
 
 
+const player = document.getElementById("player");
+
+if(player){
+
+  const x = (state.sugoroku.position % 6) * 50;
+  const y = Math.floor(state.sugoroku.position / 6) * 50;
+
+  player.style.left = x + "px";
+  player.style.top = y + "px";
+
+  player.textContent = state.player.avatar;
+
+}
 const tools = document.getElementById("devTools");
 
 if(devMode){
@@ -1115,6 +1148,15 @@ function chooseBranch(index){
 
   render();
   save();
+
+}
+
+function changeAvatar(icon){
+
+  state.player.avatar = icon;
+
+  save();
+  render();
 
 }
 
