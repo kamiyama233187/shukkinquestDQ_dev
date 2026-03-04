@@ -512,7 +512,7 @@ document.getElementById("laps").textContent =
       tile.classList.add("goal");
     }
 
-    const type = state.sugoroku.tiles[i];
+    const type = state.sugoroku.tiles[i]?.type;
 
     if(i === 29){
       tile.textContent = "G";
