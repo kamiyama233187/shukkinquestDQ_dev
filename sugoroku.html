@@ -553,6 +553,7 @@ document.getElementById("laps").textContent =
 const length = state.sugoroku.tiles.length;
 
 for(let i=0;i<length;i++){
+const tileData = state.sugoroku.tiles[i];
 
     const tile = document.createElement("div");
     tile.className = "tile";
@@ -601,8 +602,9 @@ else if(type === "heal"){
       tile.textContent = i;
     }
 
-tile.style.left = (i % 6) * 50 + "px";
-tile.style.top = Math.floor(i / 6) * 50 + "px";
+
+tile.style.left = tileData.x * 60 + "px";
+tile.style.top = tileData.y * 60 + "px";
 
     map.appendChild(tile);
   }
@@ -641,16 +643,21 @@ if(devMode){
 
 
 function generateMap(){
-let x = 0;
-let y = 0;
+
 const stage = state.sugoroku.stage;
 
   state.sugoroku.tiles = [];
 
  const length = STAGE_MAP_LENGTH[stage];
+let x = 0;
+let y = 0;
 
 for(let i=0;i<length;i++){
+x += 1;
 
+if(Math.random() < 0.35){
+  y += 1;
+}
 // 分岐テストマス
 if(i === 10){
   state.sugoroku.tiles.push({
@@ -660,61 +667,72 @@ if(i === 10){
   continue;
 }
 
-x += 1;
-
-if(Math.random() < 0.3){
-  y += 1;
-}
-
     if(i === length - 1){
-  state.sugoroku.tiles.push({type:"goal"});
+  state.sugoroku.tiles.push({
+  type:"goal",
+  x:x,
+  y:y
+});
   continue;
 }
 
 const rand = Math.random();
 const rate = STAGE_TILE_RATE[stage];
 
-state.sugoroku.tiles.push({
+if(rand < rate.plus){
+  state.sugoroku.tiles.push({
   type:"plus",
   next:[i+1],
-  x:0,
-  y:0
+x:x,
+  y:y
 });
 }
 else if(rand < rate.plus + rate.minus){
   state.sugoroku.tiles.push({
   type:"minus",
-  next:[i+1]
+  next:[i+1],
+x:x,
+  y:y
 });
 }
 else if(rand < rate.plus + rate.minus + rate.rare){
   state.sugoroku.tiles.push({
   type:"rare",
-  next:[i+1]
+  next:[i+1],
+x:x,
+  y:y
 });
 }
 else if(rand < rate.plus + rate.minus + rate.rare + rate.heal){
   state.sugoroku.tiles.push({
   type:"heal",
-  next:[i+1]
+  next:[i+1],
+x:x,
+  y:y
 });
 }
 else if(rand < rate.plus + rate.minus + rate.rare + rate.heal + rate.boss){
   state.sugoroku.tiles.push({
   type:"boss",
-  next:[i+1]
+  next:[i+1],
+x:x,
+  y:y
 });
 }
 else if(rand < rate.plus + rate.minus + rate.rare + rate.heal + rate.boss + rate.cave){
   state.sugoroku.tiles.push({
     type:"cave",
-    next:[i+1]
+    next:[i+1],
+x:x,
+  y:y
   });
 }
 else{
   state.sugoroku.tiles.push({
   type:"none",
-  next:[i+1]
+  next:[i+1],
+x:x,
+  y:y
 });
 }
   }
@@ -729,7 +747,9 @@ function generateCave(){
     if(i === 19){
       state.sugoroku.tiles.push({
         type:"exit",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
       continue;
     }
@@ -739,31 +759,41 @@ function generateCave(){
     if(rand < 0.15){
       state.sugoroku.tiles.push({
         type:"treasure",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
     }
     else if(rand < 0.35){
       state.sugoroku.tiles.push({
         type:"minus",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
     }
     else if(rand < 0.55){
       state.sugoroku.tiles.push({
         type:"boss",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
     }
     else if(rand < 0.70){
       state.sugoroku.tiles.push({
         type:"rare",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
     }
     else{
       state.sugoroku.tiles.push({
         type:"none",
-        next:[i+1]
+        next:[i+1],
+x:x,
+  y:y
       });
     }
 
