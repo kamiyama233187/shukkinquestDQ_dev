@@ -73,16 +73,20 @@
 }
 
 .map{
-  display:grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap:5px;
+  position:relative;
+  width:100%;
+  height:420px;
   margin-top:10px;
+  border:1px solid white;
 }
 
 .tile{
+  position:absolute;
+  width:40px;
+  height:40px;
   border:1px solid white;
-  padding:8px 0;
   text-align:center;
+  line-height:40px;
   font-size:12px;
 }
 
@@ -538,6 +542,8 @@ else if(type === "heal"){
       tile.textContent = i;
     }
 
+tile.style.left = (i % 6) * 50 + "px";
+tile.style.top = Math.floor(i / 6) * 50 + "px";
     map.appendChild(tile);
   }
 
