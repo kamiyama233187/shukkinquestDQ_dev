@@ -813,6 +813,19 @@ render();
 
 }
 
+if(type === "branch"){
+
+  const choice = confirm("分かれ道だ！みぎへすすむ？");
+
+  if(choice){
+    state.sugoroku.position = 15;
+  }else{
+    state.sugoroku.position = 11;
+  }
+
+  render();
+  save();
+}
 
 if(type === "boss"){
 
