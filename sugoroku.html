@@ -225,6 +225,24 @@ const STORAGE_KEY = "shukkinQuestData_v3";
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 const currentUser = state.currentUser || null;
 
+const STAGE_DATA = {
+  1: {
+    bossWinRate: 0.6,
+    bossDamage: 30,
+    healAmount: 15
+  },
+  2: {
+    bossWinRate: 0.5,
+    bossDamage: 40,
+    healAmount: 10
+  },
+  3: {
+    bossWinRate: 0.4,
+    bossDamage: 50,
+    healAmount: 5
+  }
+};
+
 let devMode = state.devMode || false;
 
 let messageQueue = [];
@@ -446,6 +464,9 @@ document.getElementById("laps").textContent =
 else if(type === "boss"){
   tile.textContent = "⚔";
 }
+else if(type === "heal"){
+  tile.textContent = "❤";
+{
     else{
       tile.textContent = i;
     }
@@ -570,9 +591,13 @@ if(type === "rare"){
 
 if(type === "boss"){
 
+const stage = state.sugoroku.stage;
+const data = STAGE_DATA[stage];
+
   const chance = Math.random();
 
-  if(chance < 0.6){
+
+ if(chance < data.bossWinRate){
 
     emp.totalPoints += 80;
     emp.totalEarned += 80;
@@ -589,7 +614,7 @@ if(type === "boss"){
     emp.totalPoints -= 20;
     if(emp.totalPoints < 0) emp.totalPoints = 0;
 
-state.sugoroku.hp -= 30;
+state.sugoroku.hp -= data.bossDamage;
 if(state.sugoroku.hp < 0){
   state.sugoroku.hp = 0;
 }
@@ -609,13 +634,16 @@ render();
 
 if(type === "heal"){
 
-  state.sugoroku.hp += 15;
+const stage = state.sugoroku.stage;
+const data = STAGE_DATA[stage];
+
+  state.sugoroku.hp += data.healAmount;
 
   if(state.sugoroku.hp > state.sugoroku.maxHp){
     state.sugoroku.hp = state.sugoroku.maxHp;
   }
 
-  showMessage("❤ HPが15回復した！");
+  showMessage("❤ HPが" + data.healAmount + "回復した！");
 
   save();
   render();
