@@ -443,8 +443,8 @@ if(state.sugoroku.hp <= 0){
     }, 800);
   }
 
-  const tileType =
-    state.sugoroku.tiles[state.sugoroku.position];
+const tileType =
+  state.sugoroku.tiles[state.sugoroku.position]?.type;
 
   handleEvent(tileType);
 
