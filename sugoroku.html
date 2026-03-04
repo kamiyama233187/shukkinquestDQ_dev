@@ -432,9 +432,6 @@ document.getElementById("stageNum").textContent =
 
   const emp = state.employees[currentUser];
 
-document.getElementById("points").textContent =
-  emp.totalPoints || 0;
-
 document.getElementById("xp").textContent =
   emp.totalEarned || 0;
 const levelData = getLevelInfo(emp.totalEarned || 0);
@@ -481,7 +478,7 @@ else if(type === "boss"){
 }
 else if(type === "heal"){
   tile.textContent = "❤";
-{
+}
     else{
       tile.textContent = i;
     }
