@@ -7,6 +7,19 @@
 
 <style>
 
+.walk{
+  animation: walkAnim 0.2s infinite alternate;
+}
+
+@keyframes walkAnim{
+  from{ transform:translateY(0px); }
+  to{ transform:translateY(-2px); }
+}
+
+#mapLayer{
+  transition: transform 0.25s linear;
+}
+
 #miniMapBox{
   margin-top:10px;
   text-align:center;
@@ -85,7 +98,7 @@
 .map{
   position:relative;
   width:100%;
-  height:480px;
+  height:60vh;
   margin-top:10px;
   border:1px solid white;
   overflow:hidden;
@@ -115,7 +128,9 @@ background:black;
   position:absolute;
   font-size:20px;
   pointer-events:none;
-z-index:5;
+  z-index:5;
+
+  transition: left 0.22s linear, top 0.22s linear;
 }
 
 .active{
@@ -425,6 +440,8 @@ function rollDice(){
 
 function startMove(roll, emp, today){
 
+document.getElementById("player").classList.add("walk");
+
   let steps = 0;
 
   const moveInterval = setInterval(()=>{
@@ -509,6 +526,8 @@ if(state.sugoroku.hp <= 0){
 
  if(steps >= roll){
 
+document.getElementById("player").classList.remove("walk");
+
   clearInterval(moveInterval);
 
   render();
@@ -533,7 +552,7 @@ const tileType =
   save();
 }
 
-  }, 250);
+  }, 200);
 }
 
 function render(){
@@ -708,8 +727,8 @@ const tileData = state.sugoroku.tiles[state.sugoroku.position];
 const x = tileData.x * 60;
 const y = tileData.y * 60;
 
-  player.style.left = x + "px";
-  player.style.top = y + "px";
+player.style.left = (x + 12) + "px";
+player.style.top = (y + 10) + "px";
 
   player.textContent = state.player.avatar;
 
