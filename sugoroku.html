@@ -569,17 +569,6 @@ if(currentTile){
   },600);
 }
 
-  const tiles = document.querySelectorAll(".tile");
-  const currentTile = tiles[state.sugoroku.position];
-
-  if(currentTile){
-    currentTile.classList.add("flash");
-
-    setTimeout(()=>{
-      currentTile.classList.remove("flash");
-    }, 800);
-  }
-
 const tileType =
   state.sugoroku.tiles[state.sugoroku.position]?.type;
 
