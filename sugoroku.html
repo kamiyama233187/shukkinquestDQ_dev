@@ -99,6 +99,7 @@
   text-align:center;
   line-height:44px;
   font-size:12px;
+  z-index:1;
 }
 
 .path{
@@ -106,6 +107,7 @@
   height:4px;
   background:white;
   transform-origin:left center;
+  z-index:0;
 }
 
 .player{
@@ -628,9 +630,6 @@ else if(type === "heal"){
 
 tile.style.left = tileData.x * 60 + "px";
 tile.style.top = tileData.y * 60 + "px";
-
-    map.appendChild(tile);
-
 if(i > 0){
 
   const prev = state.sugoroku.tiles[i-1];
@@ -658,6 +657,7 @@ if(i > 0){
 
   map.appendChild(path);
 }
+    map.appendChild(tile);
   }
 
 
