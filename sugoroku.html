@@ -582,7 +582,7 @@ tile.style.left = (i % 6) * 50 + "px";
 tile.style.top = Math.floor(i / 6) * 50 + "px";
     map.appendChild(tile);
   }
-}
+
 // HPバー更新
 const hpPercent =
   (state.sugoroku.hp / state.sugoroku.maxHp) * 100;
@@ -592,6 +592,9 @@ if(hpBar){
   hpBar.style.width = hpPercent + "%";
 }
 }
+
+}
+
 
 const tools = document.getElementById("devTools");
 
@@ -999,7 +1002,11 @@ if(state.sugoroku.position >= length){
 }
 
 function forceGoal(){
-  state.sugoroku.position = 29;
+
+const length = STAGE_MAP_LENGTH[state.sugoroku.stage];
+
+state.sugoroku.position = length - 1;
+
   render();
   save();
 }
