@@ -622,10 +622,10 @@ if(i === 10){
   continue;
 }
 
-    if(i === 29){
-      state.sugoroku.tiles.push("goal");
-      continue;
-    }
+    if(i === length - 1){
+  state.sugoroku.tiles.push({type:"goal"});
+  continue;
+}
 
 const rand = Math.random();
 const rate = STAGE_TILE_RATE[stage];
@@ -674,7 +674,7 @@ else{
 }
   }
 }
-}
+
 function generateCave(){
 
   state.sugoroku.tiles = [];
@@ -724,8 +724,8 @@ function generateCave(){
 
   }
 
-}
 
+}
 function handleEvent(type){
 
   if(!currentUser || !state.employees[currentUser]){
@@ -987,7 +987,9 @@ function devRoll(){
 
   state.sugoroku.position += val;
 
-  if(state.sugoroku.position >= 30){
+  const length = STAGE_MAP_LENGTH[state.sugoroku.stage];
+
+if(state.sugoroku.position >= length){
     state.sugoroku.position = 0;
     state.sugoroku.laps += 1;
   }
