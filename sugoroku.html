@@ -428,7 +428,9 @@ function startMove(roll, emp, today){
 
     const tile = state.sugoroku.tiles[state.sugoroku.position];
 
-if(tile && tile.type !== "branch" && tile.next){
+const tile = state.sugoroku.tiles[state.sugoroku.position];
+
+if(tile && tile.next){
   state.sugoroku.position = tile.next[0];
 }else{
   state.sugoroku.position += 1;
@@ -610,7 +612,7 @@ else if(type === "boss"){
   tile.textContent = "⚔";
 }
 else if(type === "branch"){
-  tile.textContent = "↔";
+  tile.textContent = "⇄";
 }
 else if(type === "exit"){
   tile.textContent = "🚪";
@@ -633,34 +635,40 @@ tile.style.left = tileData.x * 60 + "px";
 tile.style.top = tileData.y * 60 + "px";
 if(i > 0){
 
-  const prev = state.sugoroku.tiles[i-1];
+if(tileData.next && tileData.next.length > 1){
 
-  const x1 = prev.x * 60 + 22;
-  const y1 = prev.y * 60 + 22;
+tileData.next?.forEach(n=>{
 
-  const x2 = tileData.x * 60 + 22;
-  const y2 = tileData.y * 60 + 22;
+  const nextTile =
+    state.sugoroku.tiles.find(
+      t=>t.x===n.x*2 && t.y===n.y
+    );
 
-  const dx = x2 - x1;
-  const dy = y2 - y1;
+  if(!nextTile) return;
 
-  const length = Math.sqrt(dx*dx + dy*dy);
+  const x1 = tileData.x*60 + 22;
+  const y1 = tileData.y*60 + 22;
 
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  const x2 = nextTile.x*60 + 22;
+  const y2 = nextTile.y*60 + 22;
 
-  const path = document.createElement("div");
-  path.className = "path";
+  const dx=x2-x1;
+  const dy=y2-y1;
 
-  path.style.left = x1 + "px";
-  path.style.top = y1 + "px";
-  path.style.width = length + "px";
-  path.style.transform = `rotate(${angle}deg)`;
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const ang=Math.atan2(dy,dx)*180/Math.PI;
+
+  const path=document.createElement("div");
+
+  path.className="path";
+  path.style.left=x1+"px";
+  path.style.top=y1+"px";
+  path.style.width=len+"px";
+  path.style.transform=`rotate(${ang}deg)`;
 
   map.appendChild(path);
-}
-    map.appendChild(tile);
-  }
 
+});
 
 const mapLayer = document.getElementById("mapLayer");
 
@@ -717,53 +725,96 @@ if(devMode){
 
 function generateMap(){
 
+  const stage = state.sugoroku.stage;
+  const length = STAGE_MAP_LENGTH[stage];
 
-const stage = state.sugoroku.stage;
-const branchChance = 0.12;
+  const width = 3;
 
   state.sugoroku.tiles = [];
 
- const length = STAGE_MAP_LENGTH[stage];
-let x = 0;
-let y = 0;
+  let layers = [];
 
-for(let i=0;i<length;i++){
-x += 1;
+  for(let y=0;y<length;y++){
 
-if(Math.random() < 0.35){
-  y += 1;
-}
+    let row = [];
 
+    for(let x=0;x<width;x++){
 
-    if(i === length - 1){
-  state.sugoroku.tiles.push({
-  type:"goal",
-  x:x,
-  y:y
-});
-  continue;
-}
+      if(Math.random()<0.6){
 
-if(Math.random() < branchChance && i > 5 && i < length-6){
+        row.push({
+          x:x*2,
+          y:y,
+          next:[]
+        });
 
-  const branchY = y + 1;
+      }else{
 
-  state.sugoroku.tiles.push({
-    type:"branch",
-    next:[i+1, i+3],
-    x:x,
-    y:y
+        row.push(null);
+
+      }
+
+    }
+
+    if(row.every(r=>r===null)){
+      row[Math.floor(Math.random()*width)] = {
+        x:2,
+        y:y,
+        next:[]
+      };
+    }
+
+    layers.push(row);
+
+  }
+
+  for(let y=0;y<layers.length-1;y++){
+
+    for(let x=0;x<width;x++){
+
+      const tile = layers[y][x];
+      if(!tile) continue;
+
+      const nextOptions = [];
+
+      for(let nx=0;nx<width;nx++){
+        if(layers[y+1][nx]){
+          nextOptions.push(nx);
+        }
+      }
+
+      if(nextOptions.length===0) continue;
+
+      const connections =
+        nextOptions
+        .sort(()=>Math.random()-0.5)
+        .slice(0,Math.random()<0.5?1:2);
+
+      connections.forEach(nx=>{
+        tile.next.push({x:nx,y:y+1});
+      });
+
+    }
+
+  }
+
+  let flat=[];
+
+  layers.forEach(row=>{
+    row.forEach(tile=>{
+      if(tile) flat.push(tile);
+    });
   });
 
-  // 分岐ルート
-  state.sugoroku.tiles.push({
-    type:"none",
-    next:[i+2],
-    x:x+1,
-    y:branchY
+  flat.forEach((tile,i)=>{
+    tile.type="none";
+    tile.index=i;
   });
 
-  continue;
+  flat[flat.length-1].type="goal";
+
+  state.sugoroku.tiles=flat;
+
 }
 
 const rand = Math.random();
@@ -1275,8 +1326,6 @@ function chooseBranch(index){
 
   const nextPos = currentBranch.next[index];
 
-  if(nextPos === undefined) return;
-
   state.sugoroku.position = nextPos;
 
   document.getElementById("branchUI").style.display = "none";
@@ -1284,8 +1333,13 @@ function chooseBranch(index){
   currentBranch = null;
 
   render();
-  save();
 
+  const tileType =
+    state.sugoroku.tiles[state.sugoroku.position]?.type;
+
+  handleEvent(tileType);
+
+  save();
 }
 
 function changeAvatar(icon){
