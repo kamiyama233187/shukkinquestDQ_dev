@@ -680,13 +680,16 @@ if(mapLayer && !fullMap){
   const px = tileData.x * 60;
   const py = tileData.y * 60;
 
-  const tileSize = 60;
+  const map = document.querySelector(".map");
 
-  const cameraX = px - tileSize * CAMERA_BACK;
-  const cameraY = py - tileSize * CAMERA_BACK;
+  const viewWidth = map.clientWidth;
+  const viewHeight = map.clientHeight;
+
+  const cameraX = px - viewWidth / 2 + 30;
+  const cameraY = py - viewHeight / 2 + 30;
 
   mapLayer.style.transform =
-   `translate(${-cameraX}px, ${-cameraY}px)`;
+    `translate(${-cameraX}px, ${-cameraY}px)`;
 
 }
 
@@ -717,7 +720,7 @@ player.style.top = (y + 18) + "px";
 }
 drawMiniMap();
 updateVisibility();
-}
+
 const tools = document.getElementById("devTools");
 
 if(devMode){
