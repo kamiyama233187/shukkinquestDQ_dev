@@ -654,17 +654,17 @@ if(!prev) continue;
   const dx = x2 - x1;
   const dy = y2 - y1;
 
-  const length = Math.sqrt(dx*dx + dy*dy);
+  const pathLength = Math.sqrt(dx*dx + dy*dy);
 
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
-  const path = document.createElement("div");
-  path.className = "path";
+const path = document.createElement("div");
+path.className = "path";
 
-  path.style.left = x1 + "px";
-  path.style.top = y1 + "px";
-  path.style.width = length + "px";
-  path.style.transform = `rotate(${angle}deg)`;
+path.style.left = x1 + "px";
+path.style.top = y1 + "px";
+path.style.width = pathLength + "px";
+path.style.transform = `rotate(${angle}deg)`;
 
   map.appendChild(path);
 }
