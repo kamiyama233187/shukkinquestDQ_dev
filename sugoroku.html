@@ -771,26 +771,32 @@ player.style.top = (y + 10) + "px";
 
 }
 drawMiniMap();
-// 視界制限
+// 視界制限（座標ベース）
 const tiles = document.querySelectorAll(".tile");
+
+const playerTile = state.sugoroku.tiles[state.sugoroku.position];
 
 tiles.forEach(tile=>{
 
-if(fullMap){
-  tile.style.visibility = "visible";
-  return;
-}
+  if(fullMap){
+    tile.style.visibility="visible";
+    return;
+  }
 
   const index = Number(tile.dataset.index);
+  const t = state.sugoroku.tiles[index];
 
-  if(
-    index < state.sugoroku.position - 2 ||
-    index > state.sugoroku.position + 5
-  ){
-    tile.style.visibility = "hidden";
+  if(!t) return;
+
+  const dx = Math.abs(t.x - playerTile.x);
+  const dy = Math.abs(t.y - playerTile.y);
+
+  if(dx > 6 || dy > 4){
+    tile.style.visibility="hidden";
   }else{
-    tile.style.visibility = "visible";
+    tile.style.visibility="visible";
   }
+
 });
 }
 const tools = document.getElementById("devTools");
@@ -846,6 +852,7 @@ function generateMap(){
     const branchStart = state.sugoroku.tiles[start];
 
     branchStart.type="branch";
+branchStart.routeType=["safe","danger"];
 
     const branchIndex = state.sugoroku.tiles.length;
 
