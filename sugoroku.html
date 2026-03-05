@@ -1638,37 +1638,6 @@ ctx.fill();
 
 }
 
-function updateVisibility(){
-
-const tiles = document.querySelectorAll(".tile");
-
-tiles.forEach(tile=>{
-
-const index = parseInt(tile.dataset.index);
-
-if(isNaN(index)) return;
-
-if(fullMap){
-tile.style.visibility="visible";
-return;
-}
-
-const back = state.sugoroku.position - 2;
-const front = state.sugoroku.position + 5;
-
-if(index < back || index > front){
-
-tile.style.visibility="hidden";
-
-}else{
-
-tile.style.visibility="visible";
-
-}
-
-});
-
-}
 
 function toggleFullMap(){
 
