@@ -11,12 +11,12 @@
 
 .tile{
   position:absolute;
-  width:44px;
-  height:44px;
+  width:48px;
+  height:48px;
   border:2px solid white;
   border-radius:50%;
   text-align:center;
-  line-height:44px;
+  line-height:48px;
   font-size:14px;
   z-index:1;
   background:#0a0a0a;
@@ -200,18 +200,6 @@ background:#0a1f0a;
 .zoomFocus{
   transform: scale(1.4);
   transition: transform 0.35s ease;
-}
-
-.tile{
-  position:absolute;
-  width:48px;
-  height:48px;
-  border:1px solid white;
-  text-align:center;
-  line-height:48px;
-  font-size:12px;
-  z-index:1;
-background:black;
 }
 
 .tile.branch{
@@ -774,7 +762,7 @@ tile.classList.add("heal");
 break;
 
 case "cave":
-tile.textContent="cave.png";
+tile.innerHTML="<img src='cave.png' width='30'>";
 tile.classList.add("cave");
 break;
 
@@ -806,11 +794,11 @@ tileData.next.forEach(nextIndex=>{
 const nextTile = tiles[nextIndex];
 if(!nextTile) return;
 
-const x1 = tileData.x*60+22;
-const y1 = tileData.y*60+22;
+const x1 = tileData.x*70+24;
+const y1 = tileData.y*70+24;
 
-const x2 = nextTile.x*60+22;
-const y2 = nextTile.y*60+22;
+const x2 = nextTile.x*70+24;
+const y2 = nextTile.y*70+24;
 
 const dx = x2-x1;
 const dy = y2-y1;
@@ -854,8 +842,8 @@ if(!fullMap){
 
 const mapView=document.querySelector(".map");
 
-const px = tileData.x*60+22;
-const py = tileData.y*60+22;
+const px = tileData.x*70+24;
+const py = tileData.y*70+24;
 
 const viewWidth = mapView.clientWidth;
 const viewHeight = mapView.clientHeight;
