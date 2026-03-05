@@ -6,6 +6,87 @@
 <title>すごろくv2</title>
 
 <style>
+
+/* マスを丸くしてドラクエ風 */
+
+.tile{
+  position:absolute;
+  width:44px;
+  height:44px;
+  border:2px solid white;
+  border-radius:50%;
+  text-align:center;
+  line-height:44px;
+  font-size:14px;
+  z-index:1;
+  background:#0a0a0a;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+
+/* 現在位置 */
+
+.active{
+  background:gold;
+  color:black;
+  transform:scale(1.25);
+  box-shadow:0 0 10px gold;
+}
+
+/* ゴール */
+
+.goal{
+  border:2px solid gold;
+  box-shadow:0 0 12px gold;
+}
+
+/* プラスマス */
+
+.tile.plus{
+  background:#0f172a;
+}
+
+/* マイナスマス */
+
+.tile.minus{
+  background:#3f1d1d;
+}
+
+/* レア */
+
+.tile.rare{
+  background:#78350f;
+}
+
+/* ボス */
+
+.tile.boss{
+  background:#450a0a;
+}
+
+/* 回復 */
+
+.tile.heal{
+  background:#064e3b;
+}
+
+/* 洞窟 */
+
+.tile.cave{
+  background:#1e1b4b;
+}
+
+/* 分岐 */
+
+.tile.branch{
+  background:#1f2937;
+}
+
+/* ホバー（PC用） */
+
+.tile:hover{
+  transform:scale(1.1);
+}
+
 #mapLayer{
   transition: transform 0.25s linear;
   position:relative;
@@ -105,6 +186,10 @@
   margin-top:10px;
   border:1px solid white;
   overflow:hidden;
+background:#0a1f0a;
+  background-image:
+    radial-gradient(#1f3d1f 2px, transparent 2px);
+  background-size:40px 40px;
 }
 
 .map.full{
@@ -119,14 +204,19 @@
 
 .tile{
   position:absolute;
-  width:44px;
-  height:44px;
+  width:48px;
+  height:48px;
   border:1px solid white;
   text-align:center;
-  line-height:44px;
+  line-height:48px;
   font-size:12px;
   z-index:1;
 background:black;
+}
+
+.tile.branch{
+border:3px solid gold;
+background:#111827;
 }
 
 .path{
@@ -664,20 +754,40 @@ if(i===state.sugoroku.position) tile.classList.add("active");
 if(i===tiles.length-1) tile.classList.add("goal");
 
 switch(tileData.type){
-case "plus": tile.textContent="+"; break;
-case "minus": tile.textContent="-"; break;
-case "rare": tile.textContent="★"; break;
-case "cave": tile.textContent="cave.png"; break;
-case "boss": tile.textContent="⚔"; break;
-case "branch": tile.textContent="↔"; break;
-case "heal": tile.textContent="❤"; break;
-case "hidden": tile.textContent="?"; break;
-case "goal": tile.textContent="G"; break;
+case "minus":
+tile.textContent="-";
+tile.classList.add("minus");
+break;
+
+case "rare":
+tile.textContent="★";
+tile.classList.add("rare");
+break;
+
+case "boss":
+tile.textContent="⚔";
+tile.classList.add("boss");
+break;
+
+case "heal":
+tile.textContent="❤";
+tile.classList.add("heal");
+break;
+
+case "cave":
+tile.textContent="cave.png";
+tile.classList.add("cave");
+break;
+
+case "branch":
+tile.textContent="↔";
+tile.classList.add("branch");
+break;
 default: tile.textContent="";
 }
 
-tile.style.left = tileData.x*60+"px";
-tile.style.top = tileData.y*60+"px";
+tile.style.left = tileData.x*70+"px";
+tile.style.top = tileData.y*70+"px";
 
 map.appendChild(tile);
 
@@ -733,8 +843,8 @@ const tileData = tiles[state.sugoroku.position];
 
 if(!tileData) return;
 
-player.style.left = (tileData.x*60+22)+"px";
-player.style.top = (tileData.y*60+18)+"px";
+player.style.left = (tileData.x*70+24)+"px";
+player.style.top = (tileData.y*70+16)+"px";
 
 
 /* ===================
@@ -784,6 +894,11 @@ drawMiniMap();
 
 updateVisibility();
 
+/* ===================
+森
+=================== */
+
+drawTrees();
 }
 
 function generateMap(){
@@ -1581,6 +1696,30 @@ mapView.classList.remove("full");
 /* renderでカメラ再計算 */
 
 render();
+
+}
+
+}
+
+function drawTrees(){
+
+const mapLayer = document.getElementById("mapLayer");
+
+document.querySelectorAll(".tree").forEach(t=>t.remove());
+
+for(let i=0;i<40;i++){
+
+const tree=document.createElement("div");
+
+tree.className="tree";
+tree.textContent="🌳";
+
+tree.style.position="absolute";
+tree.style.left=Math.random()*4800+"px";
+tree.style.top=Math.random()*2800+"px";
+tree.style.opacity="0.35";
+
+mapLayer.appendChild(tree);
 
 }
 
