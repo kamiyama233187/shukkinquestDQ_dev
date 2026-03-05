@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>すごろく</title>
+<title>すごろくv2</title>
 
 <style>
 #mapLayer{
@@ -597,9 +597,15 @@ emp.sugorokuLaps || 0;
 =================== */
 
 const map = document.getElementById("map");
-map.innerHTML="";
+const mapLayer = document.getElementById("mapLayer");
+
+map.innerHTML = "";
+mapLayer.querySelectorAll(".path").forEach(p=>p.remove());
 
 const tiles = state.sugoroku.tiles;
+
+
+/* マス生成 */
 
 tiles.forEach((tileData,i)=>{
 
@@ -626,10 +632,16 @@ tile.style.top = tileData.y*60+"px";
 
 map.appendChild(tile);
 
+});
 
-/* ===== 道（パス）描画 ===== */
 
-if(tileData.next){
+/* ===================
+道（path）描画
+=================== */
+
+tiles.forEach(tileData=>{
+
+if(!tileData.next) return;
 
 tileData.next.forEach(nextIndex=>{
 
@@ -656,11 +668,9 @@ path.style.top=y1+"px";
 path.style.width=length+"px";
 path.style.transform=`rotate(${angle}deg)`;
 
-map.appendChild(path);
+mapLayer.appendChild(path);
 
 });
-
-}
 
 });
 
@@ -671,6 +681,8 @@ map.appendChild(path);
 
 const player=document.getElementById("player");
 const tileData = tiles[state.sugoroku.position];
+
+if(!tileData) return;
 
 player.style.left = (tileData.x*60+22)+"px";
 player.style.top = (tileData.y*60+18)+"px";
@@ -684,16 +696,16 @@ if(!fullMap){
 
 const mapView=document.querySelector(".map");
 
-const px = tileData.x*60;
-const py = tileData.y*60;
+const px = tileData.x*60+22;
+const py = tileData.y*60+22;
 
 const viewWidth = mapView.clientWidth;
 const viewHeight = mapView.clientHeight;
 
-const cameraX = px-viewWidth/2+30;
-const cameraY = py-viewHeight/2+30;
+const cameraX = px-viewWidth/2;
+const cameraY = py-viewHeight/2;
 
-document.getElementById("mapLayer").style.transform =
+mapLayer.style.transform =
 `translate(${-cameraX}px,${-cameraY}px)`;
 
 }
@@ -710,7 +722,17 @@ document.getElementById("hpBar").style.width =
 hpPercent+"%";
 
 
+/* ===================
+ミニマップ
+=================== */
+
 drawMiniMap();
+
+
+/* ===================
+視界制御
+=================== */
+
 updateVisibility();
 
 }
