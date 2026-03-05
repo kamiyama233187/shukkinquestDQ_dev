@@ -109,6 +109,7 @@
 
 .map.full{
   overflow:auto;
+  touch-action: pan-x pan-y;
 }
 
 .zoomFocus{
@@ -317,9 +318,24 @@ const STORAGE_KEY = "shukkinQuestData_v3";
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
+const currentUser = state.currentUser || null;
+
+// employeesが存在しない場合
+if(!state.employees){
+  state.employees = {};
+}
+
+// currentUserのデータが無い場合
+if(currentUser && !state.employees[currentUser]){
+  state.employees[currentUser] = {
+    totalPoints:0,
+    totalEarned:0,
+    sugorokuLaps:0
+  };
+}
+
 const CAMERA_BACK = 2;
 const CAMERA_FRONT = 5;
-const currentUser = state.currentUser || null;
 
 let currentBranch = null;
 if(!state.player){
@@ -472,418 +488,327 @@ box.classList.add("diceRoll");
 
 function startMove(roll, emp, today){
 
-  const player = document.getElementById("player");
-  player.classList.add("walk");
+const player = document.getElementById("player");
+player.classList.add("walk");
 
-  let steps = 0;
+let steps = 0;
 
-  const moveInterval = setInterval(()=>{
+const moveInterval = setInterval(()=>{
 
-    const tile = state.sugoroku.tiles[state.sugoroku.position];
-    if(!tile){
-      clearInterval(moveInterval);
-      return;
-    }
+const currentTile =
+state.sugoroku.tiles[state.sugoroku.position];
 
-    // 分岐マスなら停止
-    if(tile.type === "branch"){
-      clearInterval(moveInterval);
-      player.classList.remove("walk");
-      handleEvent("branch");
-      return;
-    }
+if(!currentTile){
+clearInterval(moveInterval);
+return;
+}
 
-    // 次のマス決定
-    let nextPos;
+// 分岐マスで止まる
+if(currentTile.type === "branch"){
 
-    if(tile.next && tile.next.length > 0){
-      nextPos = tile.next[0];
-    }else{
-      nextPos = state.sugoroku.position + 1;
-    }
+clearInterval(moveInterval);
+player.classList.remove("walk");
 
-    state.sugoroku.position = nextPos;
+handleEvent("branch");
+return;
 
-    steps++;
+}
 
-    walkSE.currentTime = 0;
-    walkSE.play();
+// 次のマス
+let nextPos;
 
-    render();
+if(currentTile.next && currentTile.next.length>0){
 
-    // サイコロ歩数終了
-    if(steps >= roll){
+nextPos = currentTile.next[0];
 
-      clearInterval(moveInterval);
-      player.classList.remove("walk");
+}else{
 
-      const tileType =
-        state.sugoroku.tiles[state.sugoroku.position]?.type;
+nextPos = state.sugoroku.position+1;
 
-      setTimeout(()=>{
-        handleEvent(tileType);
-      },500);
+}
 
-      emp.sugorokuLastPlayDate = today;
-      save();
-      return;
-    }
+// マップ終端安全処理
+if(nextPos >= state.sugoroku.tiles.length){
 
-    // 安全装置（絶対無限防止）
-    if(steps > 10){
-      clearInterval(moveInterval);
-      player.classList.remove("walk");
-      return;
-    }
+clearInterval(moveInterval);
+player.classList.remove("walk");
+return;
 
-  },200);
+}
+
+state.sugoroku.position = nextPos;
+
+steps++;
+
+walkSE.currentTime=0;
+walkSE.play();
+
+render();
+
+// 歩数終了
+if(steps >= roll){
+
+clearInterval(moveInterval);
+player.classList.remove("walk");
+
+const tileType =
+state.sugoroku.tiles[state.sugoroku.position]?.type;
+
+setTimeout(()=>{
+
+handleEvent(tileType);
+
+},500);
+
+emp.sugorokuLastPlayDate = today;
+save();
+
+}
+
+},200);
 
 }
 
 function render(){
 
-document.getElementById("stageNum").textContent =
-  state.sugoroku.stage;
+document.getElementById("stageNum").textContent = state.sugoroku.stage;
+document.getElementById("pos").textContent = state.sugoroku.position;
 
-  document.getElementById("pos").textContent =
-    state.sugoroku.position;
-
-  const emp = state.employees[currentUser];
-
+const emp = state.employees[currentUser];
 const earned = emp.totalEarned || 0;
 
 const levelData = getLevelInfo(earned);
 
-document.getElementById("xp").textContent =
-  earned;
-
-document.getElementById("level").textContent =
-  levelData.level;
-
-document.getElementById("points").textContent =
-  emp.totalPoints || 0;
+document.getElementById("xp").textContent = earned;
+document.getElementById("level").textContent = levelData.level;
+document.getElementById("points").textContent = emp.totalPoints || 0;
 
 const nextReq = getNextLevelRequirement(earned);
 
-if(nextReq){
-
-  const remain = nextReq - earned;
-
-  document.getElementById("nextXp").textContent =
-    remain;
-
-}else{
-
-  document.getElementById("nextXp").textContent =
-    "MAX";
-}
+document.getElementById("nextXp").textContent =
+nextReq ? nextReq - earned : "MAX";
 
 document.getElementById("laps").textContent =
-  emp.sugorokuLaps || 0;
+emp.sugorokuLaps || 0;
 
-  const map = document.getElementById("map");
-  map.innerHTML = "";
 
-const length = state.sugoroku.tiles.length;
+/* ===================
+マップ描画
+=================== */
 
-for(let i=0;i<length;i++){
-const tileData = state.sugoroku.tiles[i];
+const map = document.getElementById("map");
+map.innerHTML="";
 
-    const tile = document.createElement("div");
-    tile.className = "tile";
-tile.dataset.index = i;
+const tiles = state.sugoroku.tiles;
 
-    if(i === state.sugoroku.position){
-  tile.classList.add("active");
+tiles.forEach((tileData,i)=>{
+
+const tile = document.createElement("div");
+tile.className="tile";
+tile.dataset.index=i;
+
+if(i===state.sugoroku.position) tile.classList.add("active");
+if(i===tiles.length-1) tile.classList.add("goal");
+
+switch(tileData.type){
+case "plus": tile.textContent="+"; break;
+case "minus": tile.textContent="-"; break;
+case "rare": tile.textContent="★"; break;
+case "boss": tile.textContent="⚔"; break;
+case "branch": tile.textContent="↔"; break;
+case "heal": tile.textContent="❤"; break;
+case "goal": tile.textContent="G"; break;
+default: tile.textContent="";
 }
 
-    if(i === state.sugoroku.tiles.length - 1){
-      tile.classList.add("goal");
-    }
+tile.style.left = tileData.x*60+"px";
+tile.style.top = tileData.y*60+"px";
 
-    const type = state.sugoroku.tiles[i]?.type;
-
-   if(i === state.sugoroku.tiles.length - 1){
-  tile.textContent = "G";
-}
-    else if(type === "plus"){
-      tile.textContent = "+";
-    }
-    else if(type === "minus"){
-      tile.textContent = "-";
-    }
-    else if(type === "rare"){
-      tile.textContent = "★";
-    }
-else if(type === "boss"){
-  tile.textContent = "⚔";
-}
-else if(type === "branch"){
-  tile.textContent = "↔";
-}
-else if(type === "exit"){
-  tile.textContent = "🚪";
-}
-else if(type === "treasure"){
-  tile.textContent = "🎁";
-}
-else if(type === "cave"){
-  tile.innerHTML = "<img src='cave.png' style='width:20px'>";
-}
-else if(type === "heal"){
-  tile.textContent = "❤";
-}
-    else{
-      tile.textContent = i;
-    }
+map.appendChild(tile);
 
 
-tile.style.left = tileData.x * 60 + "px";
-tile.style.top = tileData.y * 60 + "px";
-if(i > 0){
+/* ===== 道（パス）描画 ===== */
 
-  const prev = state.sugoroku.tiles[i-1];
-if(!prev) continue;
+if(tileData.next){
 
-  const x1 = prev.x * 60 + 22;
-  const y1 = prev.y * 60 + 22;
+tileData.next.forEach(nextIndex=>{
 
-  const x2 = tileData.x * 60 + 22;
-  const y2 = tileData.y * 60 + 22;
+const nextTile = tiles[nextIndex];
+if(!nextTile) return;
 
-  const dx = x2 - x1;
-  const dy = y2 - y1;
+const x1 = tileData.x*60+22;
+const y1 = tileData.y*60+22;
 
-  const pathLength = Math.sqrt(dx*dx + dy*dy);
+const x2 = nextTile.x*60+22;
+const y2 = nextTile.y*60+22;
 
-const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+const dx = x2-x1;
+const dy = y2-y1;
+
+const length = Math.sqrt(dx*dx+dy*dy);
+const angle = Math.atan2(dy,dx)*180/Math.PI;
 
 const path = document.createElement("div");
-path.className = "path";
+path.className="path";
 
-path.style.left = x1 + "px";
-path.style.top = y1 + "px";
-path.style.width = pathLength + "px";
-path.style.transform = `rotate(${angle}deg)`;
+path.style.left=x1+"px";
+path.style.top=y1+"px";
+path.style.width=length+"px";
+path.style.transform=`rotate(${angle}deg)`;
 
-  map.appendChild(path);
-}
-    map.appendChild(tile);
-  }
+map.appendChild(path);
 
-const mapLayer = document.getElementById("mapLayer");
-
-if(mapLayer){
-
-  if(fullMap){
-
-    mapLayer.style.transform = "translate(0,0)";
-
-  }else{
-
-    const tileData = state.sugoroku.tiles[state.sugoroku.position];
-
-    const px = tileData.x * 60;
-    const py = tileData.y * 60;
-
-    const mapView = document.querySelector(".map");
-
-    const viewWidth = mapView.clientWidth;
-    const viewHeight = mapView.clientHeight;
-
-    const cameraX = px - viewWidth / 2 + 30;
-    const cameraY = py - viewHeight / 2 + 30;
-
-    mapLayer.style.transform =
-      `translate(${-cameraX}px, ${-cameraY}px)`;
-
-  }
+});
 
 }
 
-// HPバー更新
+});
+
+
+/* ===================
+プレイヤー
+=================== */
+
+const player=document.getElementById("player");
+const tileData = tiles[state.sugoroku.position];
+
+player.style.left = (tileData.x*60+22)+"px";
+player.style.top = (tileData.y*60+18)+"px";
+
+
+/* ===================
+カメラ
+=================== */
+
+if(!fullMap){
+
+const mapView=document.querySelector(".map");
+
+const px = tileData.x*60;
+const py = tileData.y*60;
+
+const viewWidth = mapView.clientWidth;
+const viewHeight = mapView.clientHeight;
+
+const cameraX = px-viewWidth/2+30;
+const cameraY = py-viewHeight/2+30;
+
+document.getElementById("mapLayer").style.transform =
+`translate(${-cameraX}px,${-cameraY}px)`;
+
+}
+
+
+/* ===================
+HP
+=================== */
+
 const hpPercent =
-  (state.sugoroku.hp / state.sugoroku.maxHp) * 100;
+(state.sugoroku.hp/state.sugoroku.maxHp)*100;
 
-const hpBar = document.getElementById("hpBar");
-if(hpBar){
-  hpBar.style.width = hpPercent + "%";
-}
+document.getElementById("hpBar").style.width =
+hpPercent+"%";
 
-const player = document.getElementById("player");
 
-if(player){
-
-  
-const tileData = state.sugoroku.tiles[state.sugoroku.position];
-
-const x = tileData.x * 60;
-const y = tileData.y * 60;
-
-player.style.left = (x + 22) + "px";
-player.style.top = (y + 18) + "px";
-
-  player.textContent = state.player.avatar;
-
-}
 drawMiniMap();
 updateVisibility();
-
-const tools = document.getElementById("devTools");
-
-if(devMode){
-  tools.style.display = "block";
-}else{
-  tools.style.display = "none";
-}
-
-}
-
-function updateVisibility(){
-
-  const tiles = document.querySelectorAll(".tile");
-
-  tiles.forEach(tile=>{
-
-    if(fullMap){
-      tile.style.visibility="visible";
-      return;
-    }
-
-    const index = Number(tile.dataset.index);
-
-    const backLimit = state.sugoroku.position - 2;
-    const frontLimit = state.sugoroku.position + 5;
-
-    if(index < backLimit || index > frontLimit){
-      tile.style.visibility="hidden";
-    }else{
-      tile.style.visibility="visible";
-    }
-
-  });
 
 }
 
 function generateMap(){
 
-  const stage = state.sugoroku.stage;
-  const length = STAGE_MAP_LENGTH[stage];
+const stage = state.sugoroku.stage;
+const length = STAGE_MAP_LENGTH[stage];
 
-  state.sugoroku.tiles = [];
+state.sugoroku.tiles=[];
 
-  let x = 0;
-  let y = 0;
+let x=0;
+let y=0;
 
-  // メインルート
-  for(let i=0;i<length;i++){
+for(let i=0;i<length;i++){
 
-    x++;
+x++;
 
-    if(Math.random() < 0.35){
-      y++;
-    }
+if(Math.random()<0.3) y++;
 
-    state.sugoroku.tiles.push({
-      x:x,
-      y:y,
-      type:"none",
-      next:[i+1]
-    });
+state.sugoroku.tiles.push({
+x:x,
+y:y,
+type:"none",
+next:[i+1]
+});
 
-  }
+}
 
-  // ゴール
-  state.sugoroku.tiles[length-1].type = "goal";
-  state.sugoroku.tiles[length-1].next = [];
+state.sugoroku.tiles[length-1].type="goal";
+state.sugoroku.tiles[length-1].next=[];
 
 
+/* 分岐 */
 
-  // 分岐生成
-  const branchCount = Math.floor(length/10);
+for(let i=10;i<length-10;i+=10){
 
-  for(let i=0;i<branchCount;i++){
+if(Math.random()<0.6){
 
-    const start = Math.floor(Math.random()*(length-15))+5;
+const start=i;
+const startTile = state.sugoroku.tiles[start];
 
-    const startTile = state.sugoroku.tiles[start];
+const branchStart = state.sugoroku.tiles.length;
 
-    if(!startTile) continue;
+startTile.type="branch";
+startTile.next=[start+1,branchStart];
 
-    startTile.type = "branch";
+let bx=startTile.x;
+let by=startTile.y+1;
 
-    const branchStartIndex = state.sugoroku.tiles.length;
+let prev=branchStart;
 
-    startTile.next = [
-      start+1,
-      branchStartIndex
-    ];
+for(let j=0;j<4;j++){
 
-    startTile.routeType = ["safe","danger"];
+bx++;
 
+const newIndex=state.sugoroku.tiles.length;
 
+state.sugoroku.tiles.push({
+x:bx,
+y:by,
+type:"none",
+next:[]
+});
 
-    let bx = startTile.x;
-    let by = startTile.y + 1;
+if(j>0){
+state.sugoroku.tiles[prev].next=[newIndex];
+}
 
-    const branchLength = Math.floor(Math.random()*4)+3;
+prev=newIndex;
 
-    let prevIndex = branchStartIndex;
+}
 
+state.sugoroku.tiles[prev].next=[start+5];
 
+}
 
-    for(let j=0;j<branchLength;j++){
-
-      bx++;
-
-      const newIndex = state.sugoroku.tiles.length;
-
-      state.sugoroku.tiles.push({
-        x:bx,
-        y:by,
-        type:"none",
-        next:[]
-      });
-
-      if(j>0){
-        state.sugoroku.tiles[prevIndex].next=[newIndex];
-      }
-
-      prevIndex = newIndex;
-
-    }
+}
 
 
+/* マス内容 */
 
-    const merge = start + branchLength + 2;
+const rate = STAGE_TILE_RATE[stage];
 
-    if(merge < length){
-      state.sugoroku.tiles[prevIndex].next = [merge];
-    }else{
-      state.sugoroku.tiles[prevIndex].next = [length-1];
-    }
+state.sugoroku.tiles.forEach(tile=>{
 
-  }
+if(tile.type!=="none") return;
 
+const r=Math.random();
 
+if(r<rate.plus) tile.type="plus";
+else if(r<rate.plus+rate.minus) tile.type="minus";
+else if(r<rate.plus+rate.minus+rate.rare) tile.type="rare";
+else if(r<rate.plus+rate.minus+rate.rare+rate.heal) tile.type="heal";
+else if(r<rate.plus+rate.minus+rate.rare+rate.heal+rate.boss) tile.type="boss";
+else if(r<rate.plus+rate.minus+rate.rare+rate.heal+rate.boss+rate.cave) tile.type="cave";
 
-  // マス内容
-  const rate = STAGE_TILE_RATE[stage];
-
-  state.sugoroku.tiles.forEach(tile=>{
-
-    if(tile.type !== "none") return;
-
-    const r = Math.random();
-
-    if(r < rate.plus) tile.type="plus";
-    else if(r < rate.plus+rate.minus) tile.type="minus";
-    else if(r < rate.plus+rate.minus+rate.rare) tile.type="rare";
-    else if(r < rate.plus+rate.minus+rate.rare+rate.heal) tile.type="heal";
-    else if(r < rate.plus+rate.minus+rate.rare+rate.heal+rate.boss) tile.type="boss";
-    else if(r < rate.plus+rate.minus+rate.rare+rate.heal+rate.boss+rate.cave) tile.type="cave";
-
-  });
+});
 
 }
 
@@ -1391,41 +1316,49 @@ function changeAvatar(icon){
 
 function drawMiniMap(){
 
-  const canvas = document.getElementById("miniMap");
-  if(!canvas) return;
+const canvas = document.getElementById("miniMap");
+if(!canvas) return;
 
-  const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  const tiles = state.sugoroku.tiles;
+const tiles = state.sugoroku.tiles;
+if(!tiles || tiles.length===0) return;
 
-  if(!tiles || tiles.length === 0) return;
+const scale = 4;
 
-  const scale = 4;
+ctx.strokeStyle="white";
+ctx.lineWidth=2;
 
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 2;
+/* ルート描画 */
 
-  for(let i=1;i<tiles.length;i++){
+tiles.forEach((tile,index)=>{
 
-    const a = tiles[i-1];
-    const b = tiles[i];
+if(!tile.next) return;
 
-    ctx.beginPath();
-    ctx.moveTo(a.x*scale+10, a.y*scale+10);
-    ctx.lineTo(b.x*scale+10, b.y*scale+10);
-    ctx.stroke();
+tile.next.forEach(nextIndex=>{
 
-  }
+const nextTile = tiles[nextIndex];
+if(!nextTile) return;
 
-  // プレイヤー
-  const p = tiles[state.sugoroku.position];
+ctx.beginPath();
+ctx.moveTo(tile.x*scale+10,tile.y*scale+10);
+ctx.lineTo(nextTile.x*scale+10,nextTile.y*scale+10);
+ctx.stroke();
 
-  ctx.fillStyle = "red";
-  ctx.beginPath();
-  ctx.arc(p.x*scale+10, p.y*scale+10, 3, 0, Math.PI*2);
-  ctx.fill();
+});
+
+});
+
+/* プレイヤー */
+
+const p = tiles[state.sugoroku.position];
+
+ctx.fillStyle="red";
+ctx.beginPath();
+ctx.arc(p.x*scale+10,p.y*scale+10,3,0,Math.PI*2);
+ctx.fill();
 
 }
 
@@ -1433,23 +1366,31 @@ let fullMap = false;
 
 function toggleFullMap(){
 
-  fullMap = !fullMap;
+fullMap = !fullMap;
 
-  const map = document.querySelector(".map");
-  const mapLayer = document.getElementById("mapLayer");
+const mapView = document.querySelector(".map");
+const mapLayer = document.getElementById("mapLayer");
 
-  if(fullMap){
+if(fullMap){
 
-    map.classList.add("full");
-    mapLayer.style.transform = "translate(0,0)";
+// 全体マップモード
+mapView.classList.add("full");
 
-  }else{
+// カメラ解除
+mapLayer.style.transform = "translate(0px,0px)";
 
-    map.classList.remove("full");
+// プレイヤー中央に移動しない
+updateVisibility();
 
-  }
+}else{
 
-  render();
+// 通常視界モード
+mapView.classList.remove("full");
+
+// カメラ再計算
+render();
+
+}
 
 }
 
