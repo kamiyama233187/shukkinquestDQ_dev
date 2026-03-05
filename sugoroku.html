@@ -509,11 +509,6 @@ if(nextTile?.type === "branch"){
 
   return;
 }
-    steps++;
-if(steps > 20){
-  clearInterval(moveInterval);
-  return;
-}
 
 walkSE.currentTime = 0;
 walkSE.play();
@@ -1505,12 +1500,14 @@ function toggleFullMap(){
  // バージョン
 const version = localStorage.getItem("appVersion");
 
-if(version){
-  document.getElementById("versionDisplay").textContent =
-    "v" + version;
-}else{
-  document.getElementById("versionDisplay").textContent =
-    "v?";
+const versionBox = document.getElementById("versionDisplay");
+
+if(versionBox){
+  if(version){
+    versionBox.textContent = "v" + version;
+  }else{
+    versionBox.textContent = "v?";
+  }
 }
 
 </script>
