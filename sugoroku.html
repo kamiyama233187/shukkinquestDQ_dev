@@ -317,7 +317,8 @@ const STORAGE_KEY = "shukkinQuestData_v3";
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
-const CAMERA_VIEW = 5;
+const CAMERA_BACK = 2;
+const CAMERA_FRONT = 5;
 const currentUser = state.currentUser || null;
 
 let currentBranch = null;
@@ -684,8 +685,8 @@ if(mapLayer){
 
 const view = CAMERA_VIEW;
 
-const cameraX = px - tileSize * view;
-const cameraY = py - tileSize * view;
+const cameraX = px - tileSize * CAMERA_BACK;
+const cameraY = py - tileSize * CAMERA_BACK;
 
 mapLayer.style.transform =
  `translate(${-cameraX}px, ${-cameraY}px)`;
