@@ -374,6 +374,49 @@ const STAGE_MAP_LENGTH = {
  5:80
 };
 
+const STAGE_PATH = {
+
+1:[
+[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
+[6,0],[7,0],[8,0],[9,0],[10,0],
+[10,1],[10,2],[9,2],[8,2],[7,2],
+[6,2],[5,2],[4,2],[3,2],[2,2],
+[1,2],[0,2]
+],
+
+2:[
+[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
+[6,0],[7,0],[8,0],
+[8,1],[8,2],[7,2],[6,2],[5,2],
+[4,2],[3,2],[2,2],[1,2],
+[0,2],[0,1]
+],
+
+3:[
+[0,0],[1,0],[2,0],[3,0],[4,0],
+[4,1],[4,2],[3,2],[2,2],[1,2],
+[0,2],[0,3],[1,3],[2,3],[3,3],
+[4,3],[5,3],[5,2],[5,1],[5,0]
+],
+
+4:[
+[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
+[6,0],[7,0],[8,0],[9,0],
+[9,1],[9,2],[8,2],[7,2],[6,2],
+[5,2],[4,2],[3,2],[2,2],
+[1,2],[0,2]
+],
+
+5:[
+[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
+[6,0],[7,0],[8,0],[9,0],
+[10,0],[10,1],[10,2],[9,2],[8,2],
+[7,2],[6,2],[5,2],[4,2],
+[3,2],[2,2],[1,2],[0,2]
+]
+
+};
+
 const STAGE_TILE_RATE = {
   1: {
     plus:0.20,
@@ -626,6 +669,7 @@ case "rare": tile.textContent="★"; break;
 case "boss": tile.textContent="⚔"; break;
 case "branch": tile.textContent="↔"; break;
 case "heal": tile.textContent="❤"; break;
+case "hidden": tile.textContent="?"; break;
 case "goal": tile.textContent="G"; break;
 default: tile.textContent="";
 }
@@ -743,117 +787,91 @@ updateVisibility();
 function generateMap(){
 
 const stage = state.sugoroku.stage;
-const length = STAGE_MAP_LENGTH[stage];
+const path = STAGE_PATH[stage];
 
 state.sugoroku.tiles = [];
 
-let x = 0;
-let y = 0;
+path.forEach((pos,i)=>{
 
-for(let i=0;i<length;i++){
+let type = "none";
 
-/* 横進み */
-
-x += 1;
-
-/* 縦ランダム */
-
-if(Math.random()<0.35){
-y += 1;
-}
-
-if(Math.random()<0.15){
-y -= 1;
-}
-
-if(y<0) y=0;
+if(i===0) type="start";
+else if(i===path.length-1) type="goal";
 
 state.sugoroku.tiles.push({
-x:x,
-y:y,
-type:"none",
+x:pos[0],
+y:pos[1],
+type:type,
 next:[i+1]
 });
 
+});
+
+/* 分岐ランダム生成 */
+
+/* 隠しルート生成 */
+
+const hiddenCount = Math.floor(path.length/15);
+
+for(let i=0;i<hiddenCount;i++){
+
+const pos = Math.floor(Math.random()*(path.length-10))+5;
+
+const tile = state.sugoroku.tiles[pos];
+
+if(!tile || tile.type!=="none") continue;
+
+tile.type="hidden";
+
 }
 
-/* ゴール */
-
-state.sugoroku.tiles[length-1].type="goal";
-state.sugoroku.tiles[length-1].next=[];
-
-
-/* 分岐生成 */
-
-const branchCount = Math.floor(length/12);
+const branchCount = Math.floor(path.length/10);
 
 for(let i=0;i<branchCount;i++){
 
-const start =
-Math.floor(Math.random()*(length-20))+8;
+const pos = Math.floor(Math.random()*(path.length-10))+3;
 
-const startTile = state.sugoroku.tiles[start];
-if(!startTile) continue;
+const tile = state.sugoroku.tiles[pos];
 
-const branchStartIndex =
-state.sugoroku.tiles.length;
+if(!tile || tile.type!=="none") continue;
 
-/* 分岐マス */
+tile.type="branch";
 
-startTile.type="branch";
-
-startTile.next=[
-start+1,
-branchStartIndex
-];
+const branchIndex = state.sugoroku.tiles.length;
 
 /* 分岐ルート */
 
-let bx=startTile.x;
-let by=startTile.y+1;
-
-let prevIndex=branchStartIndex;
-
-const branchLength =
-Math.floor(Math.random()*6)+3;
-
-for(let j=0;j<branchLength;j++){
-
-bx++;
-
-if(Math.random()<0.4){
-by++;
-}
-
-const newIndex =
-state.sugoroku.tiles.length;
+const bx = tile.x;
+const by = tile.y+1;
 
 state.sugoroku.tiles.push({
 x:bx,
 y:by,
 type:"none",
-next:[]
+next:[pos+4]
 });
 
-if(j>0){
-state.sugoroku.tiles[prevIndex].next=[newIndex];
-}
+/* 2ルート */
 
-prevIndex=newIndex;
+tile.next=[pos+1,branchIndex];
 
-}
+/* ルートタイプ */
 
-/* 合流 */
+const types=["safe","danger","treasure"];
 
-const merge =
-Math.min(start+branchLength+4,length-1);
-
-state.sugoroku.tiles[prevIndex].next=[merge];
+tile.routeType=[
+types[Math.floor(Math.random()*types.length)],
+types[Math.floor(Math.random()*types.length)]
+];
 
 }
 
+/* ゴール処理 */
 
-/* マス内容 */
+state.sugoroku.tiles[path.length-1].next=[];
+
+
+/* マスイベントランダム */
 
 const rate = STAGE_TILE_RATE[stage];
 
@@ -873,7 +891,6 @@ else if(r<rate.plus+rate.minus+rate.rare+rate.heal+rate.boss+rate.cave) tile.typ
 });
 
 }
-
 function generateCave(){
 let x = 0;
 let y = 0;
@@ -949,8 +966,53 @@ function handleEvent(type){
     alert("ログイン情報がありません");
     return;
   }
+let routeEffect=null;
+
+if(currentBranch && currentBranch.routeType){
+routeEffect=currentBranch.routeType[0];
+}
 
   const emp = state.employees[currentUser];
+
+if(type === "goal"){
+
+showMessage("🏁 ゴール！");
+
+state.sugoroku.stage++;
+
+if(state.sugoroku.stage>5){
+state.sugoroku.stage=1;
+state.employees[currentUser].sugorokuLaps++;
+}
+
+generateMap();
+state.sugoroku.position=0;
+
+save();
+render();
+
+}
+
+if(type === "hidden"){
+
+showMessage("❓ なにかが起きそうだ…");
+
+const r = Math.random();
+
+if(r < 0.4){
+showMessage("🎁 宝ルート発見！");
+handleEvent("rare");
+}
+else if(r < 0.7){
+showMessage("💰 ボーナス発見！");
+handleEvent("plus");
+}
+else{
+showMessage("💀 トラップ！");
+handleEvent("minus");
+}
+
+}
 
 if(type === "plus"){
 
@@ -1335,6 +1397,25 @@ function getNextLevelRequirement(total){
 
 function chooseBranch(index){
 
+/* ルート効果 */
+
+if(currentBranch && currentBranch.routeType){
+
+const type = currentBranch.routeType[index];
+
+if(type==="safe"){
+showMessage("🛡 安全ルートを進む！");
+}
+
+if(type==="danger"){
+showMessage("⚔ 危険な気配がする…");
+}
+
+if(type==="treasure"){
+showMessage("🎁 宝の匂いがする！");
+}
+
+}
   if(!currentBranch) return;
 
   const nextPos = currentBranch.next[index];
