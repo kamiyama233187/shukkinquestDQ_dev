@@ -471,61 +471,69 @@ box.classList.add("diceRoll");
 
 function startMove(roll, emp, today){
 
-document.getElementById("player").classList.add("walk");
+  const player = document.getElementById("player");
+  player.classList.add("walk");
 
   let steps = 0;
 
   const moveInterval = setInterval(()=>{
 
-steps++;
+    const currentTile = state.sugoroku.tiles[state.sugoroku.position];
+    if(!currentTile){
+      clearInterval(moveInterval);
+      return;
+    }
 
-// 次のマスを決める
-const tile = state.sugoroku.tiles[state.sugoroku.position];
+    // 次のマス決定
+    let nextPos;
 
-let nextPos;
+    if(currentTile.next && currentTile.next.length > 0){
+      nextPos = currentTile.next[0];
+    }else{
+      nextPos = state.sugoroku.position + 1;
+    }
 
-if(tile?.next && tile.next.length > 0){
-  nextPos = tile.next[0];
-}else{
-  nextPos = state.sugoroku.position + 1;
-}
+    state.sugoroku.position = nextPos;
 
-// 移動
-state.sugoroku.position = nextPos;
+    steps++;
 
-// 移動後のマス
-const nextTile = state.sugoroku.tiles[state.sugoroku.position];
+    walkSE.currentTime = 0;
+    walkSE.play();
 
-// 分岐なら止まる
-if(nextTile?.type === "branch"){
+    render();
 
-  clearInterval(moveInterval);
+    const tile = state.sugoroku.tiles[state.sugoroku.position];
 
-  document.getElementById("player").classList.remove("walk");
+    // 分岐なら停止
+    if(tile?.type === "branch"){
 
-  render();
+      clearInterval(moveInterval);
+      player.classList.remove("walk");
 
-  handleEvent("branch");
+      emp.sugorokuLastPlayDate = today;
+      save();
 
-  return;
-}
+      handleEvent("branch");
 
-walkSE.currentTime = 0;
-walkSE.play();
+      return;
+    }
 
-    // 🎯 ゴール処理
+    // ゴール判定
     const length = state.sugoroku.tiles.length;
 
-if(state.sugoroku.position >= length){
+    if(state.sugoroku.position >= length){
+
+      clearInterval(moveInterval);
+
       state.sugoroku.position = 0;
       state.sugoroku.laps += 1;
-state.sugoroku.stage += 1;
+      state.sugoroku.stage += 1;
 
-if(state.sugoroku.stage > 5){
-  state.sugoroku.stage = 1;
-}
+      if(state.sugoroku.stage > 5){
+        state.sugoroku.stage = 1;
+      }
 
-generateMap();
+      generateMap();
 
       if(!emp.sugorokuLaps){
         emp.sugorokuLaps = 0;
@@ -533,95 +541,75 @@ generateMap();
 
       emp.sugorokuLaps += 1;
 
-      // 🏆 1周
       emp.totalPoints += 50;
       emp.totalEarned += 50;
 
-// ❤️ HP回復
-state.sugoroku.hp += 20;
-if(state.sugoroku.hp > state.sugoroku.maxHp){
-  state.sugoroku.hp = state.sugoroku.maxHp;
-}
-
-showMessage("❤️ HPが20回復した！");
-
-      // 🌟 3周
-      if(emp.sugorokuLaps === 3 && !emp.sugorokuBonus3){
-
-        emp.totalPoints += 100;
-        emp.totalEarned += 100;
-
-        emp.sugorokuBonus3 = true;
-
-        showMessage("🌟 3周達成！100ポイントボーナス！");
-      }
-
-      // 🔥 5周称号
-      if(emp.sugorokuLaps === 5){
-        checkSugorokuTitles(currentUser);
+      state.sugoroku.hp += 20;
+      if(state.sugoroku.hp > state.sugoroku.maxHp){
+        state.sugoroku.hp = state.sugoroku.maxHp;
       }
 
       showMessage("🏆 ゴール！1周達成！");
+
+      render();
+      save();
+
+      player.classList.remove("walk");
+
+      return;
     }
 
-    render();
+    // HP0
+    if(state.sugoroku.hp <= 0){
 
-// 💀 HP0チェック
-if(state.sugoroku.hp <= 0){
+      clearInterval(moveInterval);
 
-  clearInterval(moveInterval);
+      showMessage("💀 力尽きた…拠点へ戻される");
 
-  showMessage("💀 力尽きた…拠点へ戻される");
+      state.sugoroku.position = 0;
+      state.sugoroku.hp = state.sugoroku.maxHp;
 
-  state.sugoroku.position = 0;
-  state.sugoroku.hp = state.sugoroku.maxHp;
+      render();
+      save();
 
-  render();
-  save();
-  return;
-}
+      player.classList.remove("walk");
 
- if(steps >= roll){
+      return;
+    }
 
-document.getElementById("player").classList.remove("walk");
+    // 移動終了
+    if(steps >= roll){
 
-  clearInterval(moveInterval);
+      clearInterval(moveInterval);
 
-  render();
+      player.classList.remove("walk");
 
-const tiles = document.querySelectorAll(".tile");
-const currentTile = tiles[state.sugoroku.position];
+      const tiles = document.querySelectorAll(".tile");
+      const currentTile = tiles[state.sugoroku.position];
 
-if(currentTile){
-  currentTile.classList.add("flash");
+      if(currentTile){
+        currentTile.classList.add("flash");
 
-  setTimeout(()=>{
-    currentTile.classList.remove("flash");
-  },600);
-}
+        setTimeout(()=>{
+          currentTile.classList.remove("flash");
+        },600);
+      }
 
-const tile = state.sugoroku.tiles[state.sugoroku.position];
-if(!tile) return;
+      const tileType =
+        state.sugoroku.tiles[state.sugoroku.position]?.type;
 
-if(tile?.type === "branch"){
-  emp.sugorokuLastPlayDate = today;
-  save();
-  handleEvent("branch");
-  return;
-}
+      setTimeout(()=>{
+        handleEvent(tileType);
+      },600);
 
-const tileType =
-  state.sugoroku.tiles[state.sugoroku.position]?.type;
+      emp.sugorokuLastPlayDate = today;
 
-setTimeout(()=>{
-  handleEvent(tileType);
-},600);
+      save();
 
-  emp.sugorokuLastPlayDate = today;
-  save();
-}
+    }
 
-  }, 200);
+  },200);
+
 }
 
 function render(){
