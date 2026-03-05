@@ -720,37 +720,7 @@ player.style.top = (y + 10) + "px";
 
 }
 drawMiniMap();
-// 視界制限
-
-const tiles = document.querySelectorAll(".tile");
-
-const playerTile = state.sugoroku.tiles[state.sugoroku.position];
-
-tiles.forEach(tile=>{
-
-  if(fullMap){
-    tile.style.visibility="visible";
-    return;
-  }
-
-  const index = Number(tile.dataset.index);
-  const tileData = state.sugoroku.tiles[index];
-
-  if(!tileData) return;
-
-  const dx = Math.abs(tileData.x - playerTile.x);
-  const dy = Math.abs(tileData.y - playerTile.y);
-
-  const dist = dx + dy;
-
-  if(dist > 5){
-    tile.style.visibility="hidden";
-  }else{
-    tile.style.visibility="visible";
-  }
-
-});
-
+updateVisibility();
 }
 const tools = document.getElementById("devTools");
 
@@ -760,7 +730,39 @@ if(devMode){
   tools.style.display = "none";
 }
 
+function updateVisibility(){
 
+  const tiles = document.querySelectorAll(".tile");
+
+  const playerTile = state.sugoroku.tiles[state.sugoroku.position];
+  if(!playerTile) return;
+
+  tiles.forEach(tile=>{
+
+    if(fullMap){
+      tile.style.visibility="visible";
+      return;
+    }
+
+    const index = Number(tile.dataset.index);
+    const tileData = state.sugoroku.tiles[index];
+
+    if(!tileData) return;
+
+    const dx = tileData.x - playerTile.x;
+    const dy = tileData.y - playerTile.y;
+
+    const dist = Math.abs(dx) + Math.abs(dy);
+
+    if(dist > 5){
+      tile.style.visibility="hidden";
+    }else{
+      tile.style.visibility="visible";
+    }
+
+  });
+
+}
 
 function generateMap(){
 
