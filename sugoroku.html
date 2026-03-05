@@ -720,16 +720,28 @@ function generateMap(){
 const stage = state.sugoroku.stage;
 const length = STAGE_MAP_LENGTH[stage];
 
-state.sugoroku.tiles=[];
+state.sugoroku.tiles = [];
 
-let x=0;
-let y=0;
+let x = 0;
+let y = 0;
 
 for(let i=0;i<length;i++){
 
-x++;
+/* 横進み */
 
-if(Math.random()<0.3) y++;
+x += 1;
+
+/* 縦ランダム */
+
+if(Math.random()<0.35){
+y += 1;
+}
+
+if(Math.random()<0.15){
+y -= 1;
+}
+
+if(y<0) y=0;
 
 state.sugoroku.tiles.push({
 x:x,
@@ -740,34 +752,56 @@ next:[i+1]
 
 }
 
+/* ゴール */
+
 state.sugoroku.tiles[length-1].type="goal";
 state.sugoroku.tiles[length-1].next=[];
 
 
-/* 分岐 */
+/* 分岐生成 */
 
-for(let i=10;i<length-10;i+=10){
+const branchCount = Math.floor(length/12);
 
-if(Math.random()<0.6){
+for(let i=0;i<branchCount;i++){
 
-const start=i;
+const start =
+Math.floor(Math.random()*(length-20))+8;
+
 const startTile = state.sugoroku.tiles[start];
+if(!startTile) continue;
 
-const branchStart = state.sugoroku.tiles.length;
+const branchStartIndex =
+state.sugoroku.tiles.length;
+
+/* 分岐マス */
 
 startTile.type="branch";
-startTile.next=[start+1,branchStart];
+
+startTile.next=[
+start+1,
+branchStartIndex
+];
+
+/* 分岐ルート */
 
 let bx=startTile.x;
 let by=startTile.y+1;
 
-let prev=branchStart;
+let prevIndex=branchStartIndex;
 
-for(let j=0;j<4;j++){
+const branchLength =
+Math.floor(Math.random()*6)+3;
+
+for(let j=0;j<branchLength;j++){
 
 bx++;
 
-const newIndex=state.sugoroku.tiles.length;
+if(Math.random()<0.4){
+by++;
+}
+
+const newIndex =
+state.sugoroku.tiles.length;
 
 state.sugoroku.tiles.push({
 x:bx,
@@ -777,16 +811,19 @@ next:[]
 });
 
 if(j>0){
-state.sugoroku.tiles[prev].next=[newIndex];
+state.sugoroku.tiles[prevIndex].next=[newIndex];
 }
 
-prev=newIndex;
+prevIndex=newIndex;
 
 }
 
-state.sugoroku.tiles[prev].next=[start+5];
+/* 合流 */
 
-}
+const merge =
+Math.min(start+branchLength+4,length-1);
+
+state.sugoroku.tiles[prevIndex].next=[merge];
 
 }
 
