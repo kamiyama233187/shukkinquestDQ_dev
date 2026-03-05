@@ -9,8 +9,8 @@
 #mapLayer{
   transition: transform 0.25s linear;
   position:relative;
-  width:4000px;
-  height:2000px;
+  width:5000px;
+  height:3000px;
 }
 
 #miniMapBox{
@@ -480,10 +480,18 @@ document.getElementById("player").classList.add("walk");
     const tile = state.sugoroku.tiles[state.sugoroku.position];
 
 
-if(tile && tile.type !== "branch" && tile.next){
-  state.sugoroku.position = tile.next[0];
-}else{
-  state.sugoroku.position += 1;
+if(tile){
+
+  if(tile.type === "branch"){
+    // 分岐はここでは止まる
+  }
+  else if(tile.next && tile.next.length > 0){
+    state.sugoroku.position = tile.next[0];
+  }
+  else{
+    state.sugoroku.position += 1;
+  }
+
 }
     steps++;
 
@@ -771,10 +779,11 @@ player.style.top = (y + 10) + "px";
 
 }
 drawMiniMap();
-// 視界制限（座標ベース）
+// 視界制限
 const tiles = document.querySelectorAll(".tile");
 
-const playerTile = state.sugoroku.tiles[state.sugoroku.position];
+const playerTile =
+  state.sugoroku.tiles[state.sugoroku.position];
 
 tiles.forEach(tile=>{
 
@@ -791,7 +800,7 @@ tiles.forEach(tile=>{
   const dx = Math.abs(t.x - playerTile.x);
   const dy = Math.abs(t.y - playerTile.y);
 
-  if(dx > 6 || dy > 4){
+  if(dx > 5 || dy > 3){
     tile.style.visibility="hidden";
   }else{
     tile.style.visibility="visible";
@@ -840,7 +849,7 @@ function generateMap(){
   state.sugoroku.tiles[length-1].type="goal";
 
   // 分岐生成
-  const branchCount = Math.floor(length/6);
+  const branchCount = Math.floor(length/12);
 
   for(let i=0;i<branchCount;i++){
 
