@@ -477,22 +477,37 @@ document.getElementById("player").classList.add("walk");
 
   const moveInterval = setInterval(()=>{
 
+steps++;
+
+// 次のマスを決める
 const tile = state.sugoroku.tiles[state.sugoroku.position];
 
-if(!tile) return;
+let nextPos;
 
-// 分岐マスなら止まる
-if(tile.type === "branch"){
-  clearInterval(moveInterval);
-  handleEvent("branch");
-  return;
+if(tile?.next && tile.next.length > 0){
+  nextPos = tile.next[0];
+}else{
+  nextPos = state.sugoroku.position + 1;
 }
 
-// 通常移動
-if(tile.next && tile.next.length > 0){
-  state.sugoroku.position = tile.next[0];
-}else{
-  state.sugoroku.position += 1;
+// 移動
+state.sugoroku.position = nextPos;
+
+// 移動後のマス
+const nextTile = state.sugoroku.tiles[state.sugoroku.position];
+
+// 分岐なら止まる
+if(nextTile?.type === "branch"){
+
+  clearInterval(moveInterval);
+
+  document.getElementById("player").classList.remove("walk");
+
+  render();
+
+  handleEvent("branch");
+
+  return;
 }
     steps++;
 if(steps > 20){
@@ -898,6 +913,7 @@ branchStart.routeType=["safe","danger"];
     }
 
     state.sugoroku.tiles[state.sugoroku.tiles.length-1].next=[end];
+state.sugoroku.tiles[state.sugoroku.tiles.length-1].type="none";
 
   }
 
