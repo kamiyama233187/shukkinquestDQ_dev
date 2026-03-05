@@ -405,6 +405,9 @@ let devMode = state.devMode || false;
 
 let messageQueue = [];
 let isShowingMessage = false;
+
+let fullMap = false;
+
 const walkSE = new Audio("footsteps.mp3");
 walkSE.volume = 0.3;
 
@@ -1388,14 +1391,29 @@ if(!tiles || tiles.length===0) return;
 const p = tiles[state.sugoroku.position];
 if(!p) return;
 
-const scale = 4;
+/* 最大座標取得 */
+
+let maxX = 0;
+let maxY = 0;
+
+tiles.forEach(t=>{
+if(t.x > maxX) maxX = t.x;
+if(t.y > maxY) maxY = t.y;
+});
+
+/* スケール自動調整 */
+
+const scaleX = canvas.width / (maxX + 2);
+const scaleY = canvas.height / (maxY + 2);
+
+const scale = Math.min(scaleX, scaleY);
 
 ctx.strokeStyle="white";
 ctx.lineWidth=2;
 
 /* ルート描画 */
 
-tiles.forEach((tile)=>{
+tiles.forEach(tile=>{
 
 if(!tile.next) return;
 
@@ -1405,8 +1423,8 @@ const nextTile = tiles[nextIndex];
 if(!nextTile) return;
 
 ctx.beginPath();
-ctx.moveTo(tile.x*scale+10,tile.y*scale+10);
-ctx.lineTo(nextTile.x*scale+10,nextTile.y*scale+10);
+ctx.moveTo(tile.x*scale, tile.y*scale);
+ctx.lineTo(nextTile.x*scale, nextTile.y*scale);
 ctx.stroke();
 
 });
@@ -1417,7 +1435,7 @@ ctx.stroke();
 
 ctx.fillStyle="red";
 ctx.beginPath();
-ctx.arc(p.x*scale+10,p.y*scale+10,3,0,Math.PI*2);
+ctx.arc(p.x*scale, p.y*scale, 4, 0, Math.PI*2);
 ctx.fill();
 
 }
@@ -1428,13 +1446,13 @@ const tiles = document.querySelectorAll(".tile");
 
 tiles.forEach(tile=>{
 
-const index = Number(tile.dataset.index);
+const index = parseInt(tile.dataset.index);
+
+if(isNaN(index)) return;
 
 if(fullMap){
-
 tile.style.visibility="visible";
 return;
-
 }
 
 const back = state.sugoroku.position - 2;
@@ -1470,12 +1488,6 @@ mapView.classList.add("full");
 /* カメラ解除 */
 
 mapLayer.style.transform = "translate(0px,0px)";
-
-/* 全マス表示 */
-
-document.querySelectorAll(".tile").forEach(tile=>{
-tile.style.visibility="visible";
-});
 
 }else{
 
