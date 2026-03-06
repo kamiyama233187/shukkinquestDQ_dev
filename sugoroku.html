@@ -523,6 +523,16 @@ const STAGE_TILE_RATE = {
 };
 
 let devMode = state.devMode || false;
+if(devMode){
+document.getElementById("devTools").style.display="block";
+}
+window.addEventListener("DOMContentLoaded",()=>{
+
+if(devMode){
+document.getElementById("devTools").style.display="block";
+}
+
+});
 
 let messageQueue = [];
 let isShowingMessage = false;
@@ -627,12 +637,6 @@ clearInterval(moveInterval);
 return;
 }
 
-if(currentTile.type === "goal"){
-clearInterval(moveInterval);
-player.classList.remove("walk");
-return;
-}
-
 // 分岐マスで止まる
 if(currentTile.type === "branch"){
 
@@ -683,6 +687,10 @@ player.classList.remove("walk");
 
 const tileType =
 state.sugoroku.tiles[state.sugoroku.position]?.type;
+
+if(state.sugoroku.tiles[state.sugoroku.position].type==="goal"){
+handleEvent("goal");
+}
 
 setTimeout(()=>{
 
@@ -743,7 +751,7 @@ tile.className="tile";
 tile.dataset.index=i;
 
 if(i===state.sugoroku.position) tile.classList.add("active");
-if(i===tiles.length-1) tile.classList.add("goal");
+if(tileData.type==="goal") tile.classList.add("goal");
 
 switch(tileData.type){
 
@@ -975,7 +983,7 @@ state.sugoroku.tiles.push({
 x:bx,
 y:by,
 type:"none",
-next:[Math.min(pos+4, path.length-1)]
+next:[pos+4]
 });
 
 /* 2ルート */
@@ -995,8 +1003,11 @@ types[Math.floor(Math.random()*types.length)]
 
 /* ゴール処理 */
 
-state.sugoroku.tiles[path.length-1].next=[];
+const goalIndex = path.length - 1;
 
+if(state.sugoroku.tiles[goalIndex]){
+state.sugoroku.tiles[goalIndex].next = [];
+}
 
 /* マスイベントランダム */
 
@@ -1033,7 +1044,7 @@ if(Math.random() < 0.4){
     if(i === 19){
       state.sugoroku.tiles.push({
         type:"exit",
-        next:[i+1],
+        next:[],
 x:x,
   y:y
       });
