@@ -652,7 +652,9 @@ if(!currentTile.next || currentTile.next.length === 0){
 clearInterval(moveInterval);
 player.classList.remove("walk");
 return;
+
 }
+
 nextPos = currentTile.next[0];
 
 // マップ終端安全処理
@@ -768,6 +770,11 @@ break;
 case "heal":
 tile.textContent="❤";
 tile.classList.add("heal");
+break;
+
+case "goal":
+tile.textContent="🏁";
+tile.classList.add("goal");
 break;
 
 case "cave":
@@ -1709,54 +1716,6 @@ if(versionBox){
     versionBox.textContent = "v?";
   }
 }
-
-
-/* ===== safety patch ===== */
-
-function updateVisibility(){
-  const tiles=document.querySelectorAll(".tile");
-  tiles.forEach(t=>{ t.style.visibility="visible"; });
-}
-
-function drawTrees(){
-  const mapLayer=document.getElementById("mapLayer");
-  if(!mapLayer) return;
-  document.querySelectorAll(".tree").forEach(t=>t.remove());
-  for(let i=0;i<30;i++){
-    const tree=document.createElement("div");
-    tree.className="tree";
-    tree.textContent="🌳";
-    tree.style.position="absolute";
-    tree.style.left=Math.random()*4800+"px";
-    tree.style.top=Math.random()*2800+"px";
-    tree.style.opacity="0.35";
-    mapLayer.appendChild(tree);
-  }
-}
-
-function initDevTools(){
-  const box=document.getElementById("devTools");
-  if(!box) return;
-  try{
-    const data=JSON.parse(localStorage.getItem("shukkinQuestData_v3"))||{};
-    if(data.devMode){
-      box.style.display="block";
-    }else{
-      box.style.display="none";
-    }
-  }catch(e){
-    box.style.display="none";
-  }
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  initDevTools();
-});
-
-window.onerror=function(msg,url,line){
- console.log("JS ERROR:",msg,"line:",line);
-};
-/* ===== end safety patch ===== */
 
 </script>
 </body>
