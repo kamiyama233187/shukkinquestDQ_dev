@@ -1,1508 +1,2336 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>すごろくv2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>出勤クエスト_dev</title>
 
 <style>
+.hidden{
+  display:none !important;
+}
+#viewEmployee,
+#viewAdmin{
+  padding:12px;
+}
+/* =============================
+   出勤クエスト 完全CSS版
+============================= */
 
-/* マスを丸くしてドラクエ風 */
-
-.tile{
-  position:absolute;
-  width:48px;
-  height:48px;
-  border:2px solid white;
-  border-radius:50%;
-  text-align:center;
-  line-height:48px;
-  font-size:14px;
-  z-index:1;
-  background:#0a0a0a;
-  transition:transform 0.2s, box-shadow 0.2s;
+*{
+  box-sizing:border-box;
 }
 
-/* 現在位置 */
-
-.active{
-  background:gold;
-  color:black;
-  transform:scale(1.25);
-  box-shadow:0 0 10px gold;
-}
-
-/* ゴール */
-
-.goal{
-  border:2px solid gold;
-  box-shadow:0 0 12px gold;
-}
-
-/* プラスマス */
-
-.tile.plus{
-  background:#0f172a;
-}
-
-/* マイナスマス */
-
-.tile.minus{
-  background:#3f1d1d;
-}
-
-/* レア */
-
-.tile.rare{
-  background:#78350f;
-}
-
-/* ボス */
-
-.tile.boss{
-  background:#450a0a;
-}
-
-/* 回復 */
-
-.tile.heal{
-  background:#064e3b;
-}
-
-/* 洞窟 */
-
-.tile.cave{
-  background:#1e1b4b;
-}
-
-/* 分岐 */
-
-.tile.branch{
-  background:#1f2937;
-}
-
-/* ホバー（PC用） */
-
-.tile:hover{
-  transform:scale(1.1);
-}
-
-#mapLayer{
-  transition: transform 0.25s linear;
-  position:relative;
-  width:5000px;
-  height:3000px;
-}
-
-#miniMapBox{
-  margin-top:10px;
-  text-align:center;
-}
-
-#miniMap{
-  border:1px solid white;
-  background:black;
-}
-
-.bossFlashWin {
-  animation: bossWinAnim 0.5s ease-in-out 2;
-}
-
-.bossFlashLose {
-  animation: bossLoseAnim 0.5s ease-in-out 2;
-}
-
-@keyframes bossWinAnim {
-  0% { background:black; }
-  50% { background:darkred; }
-  100% { background:black; }
-}
-
-@keyframes bossLoseAnim {
-  0% { background:black; }
-  50% { background:#222; }
-  100% { background:black; }
-}
-
-.bossWin {
-  animation: bossWinFlash 0.6s ease-in-out 2;
-}
-
-@keyframes bossWinFlash {
-  0%   { background:black; }
-  50%  { background:red; }
-  100% { background:black; }
-}
-
-.bossLose {
-  animation: bossLoseFlash 0.6s ease-in-out 2;
-}
-
-@keyframes bossLoseFlash {
-  0%   { background:black; }
-  50%  { background:#330000; }
-  100% { background:black; }
-}
-
-.rareFlash {
-  animation: rareFlashAnim 0.6s ease-in-out 2;
-}
-
-@keyframes rareFlashAnim {
-  0%   { background:black; }
-  50%  { background:gold; }
-  100% { background:black; }
-}
-
-.bigMessage {
-  font-size:22px;
-  font-weight:bold;
-}
-
-.flash {
-  animation: flashAnim 0.35s ease-in-out 2;
-}
-
-@keyframes flashAnim {
-  0%   { background:white; color:black; transform:scale(1); }
-  50%  { background:gold; color:black; transform:scale(1.15); }
-  100% { background:white; color:black; transform:scale(1); }
-}
-
-.diceRoll {
-  animation: diceAnim 0.15s infinite;
-}
-
-@keyframes diceAnim {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(15deg); }
-  100% { transform: rotate(-15deg); }
-}
-
-.map{
-  position:relative;
-  width:100%;
-  height:60vh;
-  margin-top:10px;
-  border:1px solid white;
-  overflow:hidden;
-background:#0a1f0a;
-  background-image:
-    radial-gradient(#1f3d1f 2px, transparent 2px);
-  background-size:40px 40px;
-}
-
-.map.full{
-  overflow:auto;
-  touch-action: pan-x pan-y;
-}
-
-.zoomFocus{
-  transform: scale(1.4);
-  transition: transform 0.35s ease;
-}
-
-.tile.branch{
-border:3px solid gold;
-background:#111827;
-}
-
-.path{
-  position:absolute;
-  height:3px;
-  background:#999;
-  transform-origin:left center;
-  z-index:0;
-}
-
-.player{
-  position:absolute;
-  font-size:20px;
-  pointer-events:none;
-  z-index:5;
-
-  transition: left 0.22s linear, top 0.22s linear;
-}
-
-.walk{
-  animation: walkAnim 0.2s infinite alternate;
-}
-
-@keyframes walkAnim{
-  from{ transform:translateY(0px); }
-  to{ transform:translateY(-2px); }
-}
-
-.active{
-  background:white;
-  color:black;
-}
-
-.goal{
-  border:2px solid gold;
-}
-
-body{
+html,body{
   margin:0;
-  background:black;
-  color:white;
+  height:100%;
+  background:#000;
+  color:#fff;
   font-family:"MS Gothic", monospace;
+  letter-spacing:1px;
 }
 
-.container{
-  width:95%;
-  max-width:700px;
-  margin:20px auto;
+/* =============================
+   共通UI
+============================= */
+
+.hidden{
+  display:none;
 }
 
-.window{
-  border:2px solid white;
-  padding:15px;
-  margin-bottom:15px;
-}
-
-.title{
-  text-align:center;
-  font-size:22px;
-  margin-bottom:10px;
-}
-
-.center{
-  text-align:center;
+.card{
+  background:#000;
+  border:3px solid #fff;
+  padding:12px;
+  margin-bottom:12px;
 }
 
 button{
-  background:black;
-  color:white;
-  border:2px solid white;
-  padding:10px 20px;
-  font-size:16px;
+  background:#000;
+  color:#fff;
+  border:2px solid #fff;
+  padding:8px;
+  cursor:pointer;
 }
 
 button:active{
-  background:white;
-  color:black;
+  transform:scale(0.95);
 }
+
+.badge{
+  border:1px solid #fff;
+  padding:2px 6px;
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:4px 0;
+}
+
+.row{
+  display:flex;
+  gap:8px;
+}
+
+.row > *{
+  flex:1;
+}
+
+/* =============================
+   メッセージウィンドウ
+============================= */
+
+#dqMessage{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+  max-width:480px;
+  background:#000;
+  border:3px solid #fff;
+  padding:16px;
+  z-index:9999;
+}
+
+/* =============================
+   経験値バー
+============================= */
+
+#expBarWrap{
+  height:14px;
+  border:1px solid #fff;
+  margin-top:6px;
+}
+
+#expBar{
+  height:100%;
+  width:0%;
+  background:#fff;
+  transition:0.4s;
+}
+
+/* =============================
+   ログイン画面
+============================= */
+
+#viewLogin{
+  min-height:100vh;
+border:3px solid #fff;
+  display:flex;
+margin:12px;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:20px;
+}
+
+.main-logo{
+  width:100%;
+  max-height:35vh;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+
+/* 下段 */
+.login-bottom{
+  display:flex;
+  gap:3vw;
+  align-items:stretch;
+  flex:1;
+}
+
+/* 左側（入力） */
+.login-left{
+  flex:1;
+  max-width:600px;
+}
+
+.code-input{
+  width:100%;
+  font-size:clamp(20px,3vw,32px);
+  text-align:center;
+  margin-bottom:12px;
+  padding:10px;
+  background:#000;
+  border:2px solid #fff;
+  color:#fff;
+}
+
+/* テンキー */
+.keypad{
+  width:35%;
+  max-width:400px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1vw;
+}
+
+.keypad button{
+  aspect-ratio:1/1;
+  font-size:clamp(16px,2vw,26px);
+}
+
+/* =============================
+   従業員画面
+============================= */
+
+#viewEmployee{
+  padding:16px;
+  overflow:auto;
+}
+
+.topstats{
+  display:flex;
+  gap:12px;
+}
+
+.topstats .card{
+  flex:1;
+  text-align:center;
+}
+
+/* =============================
+   管理画面
+============================= */
+
+#viewAdmin{
+  padding:16px;
+  overflow:auto;
+}
+
+input{
+  background:#000;
+  border:2px solid #fff;
+  color:#fff;
+  padding:6px;
+}
+
+/* =============================
+   横画面最適化
+============================= */
+
+@media (orientation: landscape){
+
+  #viewLogin{
+    padding:20px 40px;
+  }
+
+  .main-logo{
+    max-height:40vh;
+  }
+
+  .login-bottom{
+    align-items:center;
+  }
+
+  .keypad{
+    width:30%;
+  }
+}
+
+/* =============================
+   縦画面簡易対応
+============================= */
+
+@media (orientation: portrait){
+
+  .login-bottom{
+    flex-direction:column;
+  }
+
+  .keypad{
+    width:100%;
+    max-width:none;
+  }
+}
+.title-R   { color:#7dd3fc; }      /* 青 */
+.title-SR  { color:#facc15; }      /* 金 */
+.title-SSR { color:#f472b6; }      /* ピンク */
+.title-UR  { color:#a78bfa; }      /* 紫 */
+
+.title-appear{
+  animation: titlePop 0.4s ease forwards;
+  opacity:0;
+}
+
+@keyframes titlePop{
+  from{
+    transform:translateY(10px) scale(0.9);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0) scale(1);
+    opacity:1;
+  }
+}
+/* ===== レア度演出 ===== */
+
+.title-R{
+  color:#7dd3fc;
+}
+
+.title-SR{
+  color:#facc15;
+  animation: glowSR 1.5s ease-in-out infinite alternate;
+}
+
+.title-SSR{
+  color:#f472b6;
+  animation: glowSSR 1s ease-in-out infinite alternate;
+}
+
+.title-UR{
+  background:linear-gradient(90deg,#a855f7,#f0abfc,#a855f7);
+  background-size:200% 100%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  animation:
+    glowUR 0.6s ease-in-out infinite alternate,
+    rainbow 2s linear infinite;
+}
+
+/* --- SR：ほんのり --- */
+@keyframes glowSR{
+  from{ text-shadow:0 0 4px gold; }
+  to{   text-shadow:0 0 12px gold; }
+}
+
+/* --- SSR：強め --- */
+@keyframes glowSSR{
+  from{
+    text-shadow:0 0 6px #ff66cc;
+  }
+  to{
+    text-shadow:0 0 18px #ff66cc,
+                 0 0 30px #ff1493;
+  }
+}
+
+/* --- UR：激しく --- */
+@keyframes glowUR{
+  from{
+    text-shadow:
+      0 0 10px #a855f7,
+      0 0 20px #9333ea;
+  }
+  to{
+    text-shadow:
+      0 0 20px #c084fc,
+      0 0 40px #a855f7,
+      0 0 60px #9333ea;
+  }
+}
+
+@keyframes rainbow{
+  0%{ background-position:0% 0%; }
+  100%{ background-position:200% 0%; }
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.modalBox{
+  background:#111827;
+  padding:20px;
+  border-radius:12px;
+  width:320px;
+  max-width:90%;
+}
+
+.modalHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.modalActions{
+  margin-top:15px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.closeBtn{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+}
+
+#versionDisplay{
+  position:fixed;
+  bottom:8px;
+  right:12px;
+  font-size:11px;
+  opacity:0.6;
+  pointer-events:none;
+}
+
 </style>
 </head>
-
 <body>
 
-<div id="versionDisplay"
-     style="position:fixed;
-            bottom:8px;
-            right:12px;
-            font-size:11px;
-            opacity:0.6;
-            pointer-events:none;">
+<!-- ログイン -->
+<section id="viewLogin">
+  <img src="shukkin_logo.png" class="main-logo">
+
+  <div class="login-bottom">
+    <div class="login-left">
+      <input id="loginCode" readonly class="code-input" placeholder="従業員コード(7桁)を入力">
+      <button onclick="login()">▶ ぼうけんを はじめる</button>
+    </div>
+    
+    <button onclick="location.href='about.html'">
+  出勤クエストとは？
+</button>
+
+    <div class="keypad">
+      <button onclick="addNum('1')">1</button>
+      <button onclick="addNum('2')">2</button>
+      <button onclick="addNum('3')">3</button>
+      <button onclick="addNum('4')">4</button>
+      <button onclick="addNum('5')">5</button>
+      <button onclick="addNum('6')">6</button>
+      <button onclick="addNum('7')">7</button>
+      <button onclick="addNum('8')">8</button>
+      <button onclick="addNum('9')">9</button>
+      <button onclick="clearCode()">C</button>
+      <button onclick="addNum('0')">0</button>
+      <button onclick="backspace()">←</button>
+    </div>
+  </div>
+</section>
+
+<!-- 従業員 -->
+<section id="viewEmployee" class="hidden">
+
+  <!-- ステータス -->
+<div class="card">
+  <div id="levelInfo"></div>
+  <div id="expInfo"></div>
+  <div id="nextLevelInfo"></div>
+
+  <div>今日のポイント：<span id="todayPoints">0</span></div>
+  <div>累計ポイント：<span id="totalPoints">0</span></div>
+
+  <div id="expBarWrap">
+    <div id="expBar"></div>
+  </div>
 </div>
 
-<div class="container">
+<button onclick="location.href='sugoroku.html'">
+  🎲 すごろく
+</button>
 
-<div class="window">
-  <div class="title">すごろくの世界</div>
-  ここは 冒険者たちの 試練の地。<br>
-  サイコロを振り、マスを進め。
+  <!-- タブボタン -->
+  <div class="card">
+    <div class="row">
+      <button onclick="showEmpTab('empQuest')">クエスト</button>
+      <button onclick="showEmpTab('empShop')">ポイント交換</button>
+      <button onclick="showEmpTab('empRanking')">ランキング</button>
+<button onclick="showEmpTab('empTitles')">称号</button>
+    </div>
+  </div>
+
+  <!-- ===== クエストタブ ===== -->
+  <div id="empQuest" class="card">
+    <h3>今日のクエスト</h3>
+    <div id="questList" class="list"></div>
+  </div>
+
+  <!-- ===== ショップタブ ===== -->
+  <div id="empShop" class="card hidden">
+    <h3>ポイント交換</h3>
+    <div id="rewardShop" class="list"></div>
+  </div>
+
+  <!-- ===== ランキングタブ ===== -->
+  <div id="empRanking" class="card hidden">
+    <h3>ランキング</h3>
+    <div id="rankingListEmployee" class="list"></div>
+  </div>
+<!-- ===== 称号タブ ===== -->
+<div id="empTitles" class="card hidden">
+  <h3>獲得称号</h3>
+
+  <div id="titleProgress"></div>
+
+  <div id="titleBarWrap" style="border:1px solid #fff; height:12px; margin:8px 0;">
+    <div id="titleBar" style="height:100%; width:0%; background:#fff;"></div>
+  </div>
+
+  <div id="titleList" class="list"></div>
 </div>
 
-<div class="window center">
-<div id="miniMapBox">
-  <canvas id="miniMap" width="200" height="60"></canvas>
+  <div class="card">
+    <button onclick="logout()">ログアウト</button>
+
+  </div>
+
+</section>
+
+<section id="viewAdmin" class="hidden">
+
+  <!-- メニュー -->
+  <div class="card">
+    <h2>管理者メニュー</h2>
+
+    <div class="row">
+      <button onclick="showTab('adminEmployees')">従業員</button>
+      <button onclick="showTab('adminQuests')">クエスト</button>
+      <button onclick="showTab('adminRewards')">景品</button>
+      <button onclick="showTab('adminData')">データ</button>
+<button onclick="showTab('adminHistory')">履歴</button>
+<button onclick="showTab('adminVersion')">バージョン</button>
+    </div>
+
+    <div style="margin-top:10px;">
+      <button onclick="resetToday()">今日の進捗リセット</button>
+      <button onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+
+  <!-- =============================
+       従業員管理
+  ============================= -->
+  <div id="adminEmployees" class="card">
+    <h3>従業員管理</h3>
+
+    <div class="row">
+      <input id="empCode"
+       type="tel"
+       inputmode="numeric"
+       pattern="[0-9]*"
+       maxlength="7"
+       placeholder="従業員コード"
+       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+       onkeydown="handleEmpCodeKey(event)">
+      <input id="empName" placeholder="名前">
+      <input id="empShiftName" placeholder="シフト苗字">
+    </div>
+
+    <div style="margin-top:10px;">
+      <button onclick="addEmployee()">追加</button>
+    </div>
+
+    <div id="employeeList" class="list" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- =============================
+       クエスト管理
+  ============================= -->
+  <div id="adminQuests" class="card hidden">
+    <h3>クエスト管理</h3>
+
+    <div class="row">
+      <input id="qTitle" placeholder="クエスト名">
+      <input id="qPoints" type="number" placeholder="ポイント">
+    </div>
+
+    <div style="margin-top:10px;">
+      <button onclick="addQuest()">追加</button>
+    </div>
+
+    <div id="questAdminList" class="list" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- =============================
+       景品管理
+  ============================= -->
+  <div id="adminRewards" class="card hidden">
+    <h3>景品管理</h3>
+
+    <div class="row">
+      <input id="rewardTitle" placeholder="景品名">
+      <input id="rewardCost" type="number" placeholder="必要ポイント">
+    </div>
+
+    <div style="margin-top:10px;">
+      <button onclick="addReward()">追加</button>
+    </div>
+
+    <div id="rewardAdminList" class="list" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- =============================
+       データ管理
+  ============================= -->
+  <div id="adminData" class="card hidden">
+    <h3>データ管理</h3>
+
+    <button onclick="exportData()">JSON書き出し</button>
+    <input id="importFile" type="file" accept="application/json">
+    <button onclick="importData()">JSON読み込み</button>
+<hr style="margin:20px 0;">
+<hr style="margin:20px 0;">
+<h3>従業員専用インポート</h3>
+
+<button onclick="openEmployeeImport()">従業員JSON読み込み</button>
+
+
+<h3>CSV機能</h3>
+
+<button onclick="exportEmployeesToCSV()">従業員CSV出力</button>
+
+<button onclick="openShiftCSV()">シフトCSV読み込み</button>
+<input id="shiftCsvInput"
+       type="file"
+       accept=".csv"
+       style="display:none"
+       onchange="loadShiftCSV(this.files[0])">
+
+<button onclick="exportExchangeHistoryCSV()">交換履歴CSV出力</button>
+    <div style="margin-top:20px;">
+      <h3>ランキング</h3>
+      <div id="rankingList" class="list"></div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <h3>交換履歴</h3>
+      <div id="exchangeHistoryList" class="list"></div>
+      <button onclick="exportExchangeHistoryCSV()">履歴CSV出力</button>
+    </div>
 </div>
-ステージ：<span id="stageNum">1</span><br>
+<hr style="margin:20px 0;">
 
-Lv：<span id="level">1</span><br>
-所持ポイント：<span id="points">0</span> pt<br>
-経験値：<span id="xp">0</span><br>
-次のレベルまで：<span id="nextXp">0</span> XP<br><br>
+<div id="adminHistory" class="card hidden">
 
-現在位置：<span id="pos">0</span> マス<br>
-周回数：<span id="laps">0</span><br><br>
+  <h3>日別履歴</h3>
+  <div id="historyList" class="list"></div>
+</div>
+<div id="adminVersion" class="card hidden">
+
+  <h3>バージョン情報</h3>
+  <div id="currentVersion"></div>
+
+  <div style="margin-top:12px;">
+    <h4>アップデート履歴</h4>
+    <div id="versionHistoryList" class="list"></div>
+  </div>
+</div>
+
+<h3>手動シフト追加（救済用）</h3>
+
+<div class="row">
+  <input id="manualShiftName" placeholder="シフト苗字（例：山田）">
+  <input id="manualShiftDate" type="date">
+</div>
 
 <div style="margin-top:10px;">
-  HP
-  <div id="hpBarContainer" style="
-    width:100%;
-    height:14px;
-    border:1px solid white;
-    margin-top:3px;
-  ">
-    <div id="hpBar" style="
-      width:100%;
-      height:100%;
-      background:red;
-    "></div>
-  </div>
+  <button onclick="addManualShift()">この日を出勤扱いにする</button>
 </div>
-<button onclick="toggleFullMap()">全体マップ</button>
+<hr style="margin:20px 0;">
+<h3 style="color:#f66;">危険操作</h3>
 
-  <button onclick="rollDice()">サイコロを振る</button>
+<button onclick="confirmFullReset()" 
+        style="background:#300; border-color:#f00; color:#f88;">
+  ⚠ 全データ削除
+</button>
 
-<div class="map">
-  <div id="mapLayer">
-    <div id="map"></div>
-    <div id="player" class="player">🧍</div>
-  </div>
-</div>
+</section>
 
-</div>
-
-<div id="dqMessage" class="window center" style="display:none;"></div>
-
-<div id="branchUI" style="display:none; text-align:center; margin-top:10px;">
-
-  <div style="margin-bottom:10px;">
-    ↔ 分かれ道！どちらへ進む？
-  </div>
-
-<button id="branchBtn0" onclick="chooseBranch(0)"></button>
-<button id="branchBtn1" onclick="chooseBranch(1)"></button>
-
-</div>
-
-<div id="devTools" style="display:none; margin-top:10px;">
-
-  <input type="number" id="devSteps" placeholder="移動数" style="width:80px;">
-  <button onclick="devRoll()">指定移動</button>
-
-  <button onclick="forceGoal()">強制ゴール</button>
-  <button onclick="warpTo(29)">29へワープ</button>
-
-</div>
-
-<hr style="margin:10px 0; border-color:white;">
-
-<button onclick="devTrigger('plus')">＋マス</button>
-<button onclick="devTrigger('minus')">－マス</button>
-<button onclick="devTrigger('rare')">レア</button>
-<button onclick="devTrigger('boss')">ボス</button>
-<button onclick="devTrigger('goal')">ゴール</button>
-<button onclick="devHp(10)">❤️ HP +10</button>
-<button onclick="devHp(-10)">💔 HP -10</button>
-<button onclick="devFullHp()">💯 HP全回復</button>
-<button onclick="regenerateMap()">🗺 マップ再生成</button>
-
-<div class="center">
-  <button onclick="location.href='index.html'">
-    もどる
-  </button>
-</div>
-
-</div>
+<div id="versionDisplay"></div>
 
 <script>
-
+const ADMIN_CODE = "3963233187";
 const STORAGE_KEY = "shukkinQuestData_v3";
+const APP_VERSION = "1.2.2";
 
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+localStorage.setItem("appVersion", APP_VERSION);
 
-const currentUser = state.currentUser || null;
+  document.getElementById("versionDisplay")
+    .textContent = "v" + APP_VERSION;
 
-// employeesが存在しない場合
-if(!state.employees){
-  state.employees = {};
-}
-
-// currentUserのデータが無い場合
-if(currentUser && !state.employees[currentUser]){
-  state.employees[currentUser] = {
-    totalPoints:0,
-    totalEarned:0,
-    sugorokuLaps:0
-  };
-}
-
-const CAMERA_BACK = 2;
-const CAMERA_FRONT = 5;
-
-let currentBranch = null;
-if(!state.player){
-  state.player = {
-    avatar:"🧍",
-    hair:0,
-    face:0,
-    body:0,
-    armor:0
-  };
-}
-
-const STAGE_DATA = {
-  1: {
-    bossWinRate: 0.6,
-    bossDamage: 30,
-    healAmount: 15
+const VERSION_HISTORY = [
+ {
+    version:"1.2.2",
+    date:"2026-03-04",
+    content:["すごろくステージ制"]
   },
-  2: {
-    bossWinRate: 0.5,
-    bossDamage: 40,
-    healAmount: 10
+  {
+    version:"1.2.1",
+    date:"2026-03-03",
+    content:["すごろく機能強化"]
   },
-  3: {
-    bossWinRate: 0.4,
-    bossDamage: 50,
-    healAmount: 5
+  {
+    version:"1.2.0",
+    date:"2026-03-03",
+    content:["すごろく基本機能実装"]
+  },
+  {
+    version:"1.1.0",
+    date:"2026-03-03",
+    content:["すごろく実装準備開始"]
+  },
+  {
+    version:"1.0.2",
+    date:"2026-03-02",
+    content:["管理画面にバージョン履歴追加"]
+  },
+  {
+    version:"1.0.1",
+    date:"2026-03-02",
+    content:["右下バージョン表示追加"]
+  },
+  {
+    version:"1.0.0",
+    date:"2026-03-01",
+    content:["出勤クエスト基本機能完成"]
   }
-};
+];
 
-const STAGE_MAP_LENGTH = {
- 1:60,
- 2:70,
- 3:80,
- 4:70,
- 5:80
-};
+/* ================= TITLE MASTER ================= */
 
-const STAGE_PATH = {
+const TITLE_MASTER = {
 
-1:[
-[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
-[6,0],[7,0],[8,0],[9,0],[10,0],
-[10,1],[10,2],[9,2],[8,2],[7,2],
-[6,2],[5,2],[4,2],[3,2],[2,2],
-[1,2],[0,2]
-],
+  /* ===== パーフェクト系 ===== */
 
-2:[
-[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
-[6,0],[7,0],[8,0],
-[8,1],[8,2],[7,2],[6,2],[5,2],
-[4,2],[3,2],[2,2],[1,2],
-[0,2],[0,1]
-],
-
-3:[
-[0,0],[1,0],[2,0],[3,0],[4,0],
-[4,1],[4,2],[3,2],[2,2],[1,2],
-[0,2],[0,3],[1,3],[2,3],[3,3],
-[4,3],[5,3],[5,2],[5,1],[5,0]
-],
-
-4:[
-[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
-[6,0],[7,0],[8,0],[9,0],
-[9,1],[9,2],[8,2],[7,2],[6,2],
-[5,2],[4,2],[3,2],[2,2],
-[1,2],[0,2]
-],
-
-5:[
-[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
-[6,0],[7,0],[8,0],[9,0],
-[10,0],[10,1],[10,2],[9,2],[8,2],
-[7,2],[6,2],[5,2],[4,2],
-[3,2],[2,2],[1,2],[0,2]
-]
-
-};
-
-const STAGE_TILE_RATE = {
-  1: {
-    plus:0.20,
-    minus:0.08,
-    rare:0.07,
-    heal:0.10,
-    boss:0.05,
-    cave:0.03
+  perfect1:{
+    name:"完全攻略者",
+    description:"クエストを1日全制覇した証。",
+    type:"perfect",
+    rarity:"R"
   },
-  2: {
-    plus:0.15,
-    minus:0.12,
-    rare:0.07,
-    heal:0.06,
-    boss:0.08,
-    cave:0.05
+
+  perfect5:{
+    name:"熟練攻略者",
+    description:"全制覇を5回達成した。",
+    type:"perfect_total",
+    rarity:"R"
   },
-  3: {
-    plus:0.10,
-    minus:0.18,
-    rare:0.05,
-    heal:0.03,
-    boss:0.12,
-    cave:0.07
+
+  perfect10:{
+    name:"完全支配者",
+    description:"全制覇を10回達成した。",
+    type:"perfect_total",
+    rarity:"SR"
+  },
+
+  perfect30:{
+    name:"伝説の制覇王",
+    description:"30回の完全制覇を成し遂げた。",
+    type:"perfect_total",
+    rarity:"SSR"
+  },
+
+  /* ===== 連続系 ===== */
+
+  streak3:{
+    name:"まじめな冒険者",
+    description:"3日連続で全制覇した。",
+    type:"continue",
+    rarity:"R"
+  },
+
+  streak7:{
+    name:"鉄人冒険者",
+    description:"7日連続で全制覇した。",
+    type:"continue",
+    rarity:"SR"
+  },
+
+  streak30:{
+    name:"伝説の皆勤王",
+    description:"30日連続で全制覇した。",
+    type:"continue",
+    rarity:"SSR"
+  },
+
+  /* ===== 夜勤系 ===== */
+
+  night5:{
+    name:"夜の番人",
+    description:"深夜の全制覇を5回達成した。",
+    type:"night",
+    rarity:"R"
+  },
+
+  night20:{
+    name:"闇の守護者",
+    description:"夜勤全制覇を20回達成した。",
+    type:"night",
+    rarity:"SR"
+  },
+
+  night50:{
+    name:"常夜の支配者",
+    description:"50回の深夜制覇を成し遂げた伝説の存在。",
+    type:"night",
+    rarity:"SSR"
+  },
+
+  /* ===== すごろく系 ===== */
+
+sugoroku5:{
+  name:"盤上の勇者",
+  description:"すごろくを5周達成した証。",
+  type:"sugoroku",
+  rarity:"R"
+},
+
+sugoroku20:{
+  name:"盤上の覇者",
+  description:"すごろくを20周達成した。",
+  type:"sugoroku",
+  rarity:"SR"
+},
+
+sugoroku50:{
+  name:"盤上の支配者",
+  description:"すごろくを50周達成した伝説級の存在。",
+  type:"sugoroku",
+  rarity:"SSR"
+},
+
+sugoroku100:{
+  name:"盤上の神",
+  description:"すごろくを100周制覇した究極の勇者。",
+  type:"sugoroku",
+  rarity:"UR"
+},
+
+  /* ===== 隠し称号 ===== */
+
+  secret_firstLogin:{
+    name:"目覚めし者",
+    description:"はじめてログインした。",
+    type:"secret",
+    rarity:"R"
+  },
+
+  secret_noPoint:{
+    name:"無一文",
+    description:"ポイント不足で交換に失敗した。",
+    type:"secret",
+    rarity:"R"
+  },
+
+  secret_earlyBird:{
+    name:"夜明けの勇者",
+    description:"7時ちょうどにログインした。",
+    type:"secret",
+    rarity:"SR"
+  },
+
+  /* ===== 真称号 ===== */
+
+  secret_master:{
+    name:"真の勇者",
+    description:"すべての称号を集めた究極の存在。",
+    type:"secret",
+    rarity:"UR"
   }
+
 };
 
-let devMode = state.devMode || false;
+/* ================= STATE ================= */
 
-let messageQueue = [];
-let isShowingMessage = false;
+let state = {
+  employees:{},
+  quests:[],
+  rewards:[],
+  today:{date:todayStr(),progress:{}},
+  shiftTable:{},
+  shiftOverrides:{},   // ← カンマ必要
+  exchangeHistory:[],
+history:{}
+};
 
-let fullMap = false;
+let currentUser=null;
+let devMode = false;
+let isAdmin=false;
 
-const walkSE = new Audio("footsteps.mp3");
-walkSE.volume = 0.3;
+/* ===== サウンド ===== */
+const attackSound = new Audio("attack.mp3");
+const missSound = new Audio("miss.mp3");
+const cursorSound   = new Audio("cursor.mp3");
+const decisionSound = new Audio("decision.mp3");
+const battleEndSound = new Audio("battle_end.mp3");
 
-if(!currentUser){
-  alert("ログインしてからプレイしてください");
-  location.href = "index.html";
+missSound.volume = 0.5;
+cursorSound.volume = 0.4;
+decisionSound.volume = 0.5;
+battleEndSound.volume = 0.6;
+attackSound.volume = 0.8;
+
+function playAttack(){
+  attackSound.currentTime = 0;
+  attackSound.play();
+}
+
+function playMiss(){
+  missSound.currentTime = 0;
+  missSound.play();
+}
+function playCursor(){
+  cursorSound.currentTime = 0;
+  cursorSound.play();
+}
+
+function playDecision(){
+  decisionSound.currentTime = 0;
+  decisionSound.play();
+}
+
+function playBattleEnd(){
+  battleEndSound.currentTime = 0;
+  battleEndSound.play();
+}
+/* ================= UTIL ================= */
+
+function todayStr(){
+
+  const d = new Date();
+
+  // ⭐ 朝7時より前は「前日扱い」
+  if(d.getHours() < 7){
+    d.setDate(d.getDate() - 1);
+  }
+
+  return d.getFullYear() + "-" +
+         String(d.getMonth()+1).padStart(2,"0") + "-" +
+         String(d.getDate()).padStart(2,"0");
+}
+
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+
+  if(raw){
+    try{
+      state = JSON.parse(raw);
+    }catch(e){}
+  }
+
+  // ===== 配列だった場合の自動修正 =====
+  if(Array.isArray(state.employees)){
+    const fixed = {};
+    state.employees.forEach(emp=>{
+      const code = String(emp.id);
+      fixed[code] = emp;
+    });
+    state.employees = fixed;
+    save();
+  }
+
+  // ===== 不足データ補完（保険） =====
+  if(!state.rewards) state.rewards = [];
+  if(!state.shiftTable) state.shiftTable = {};
+  if(!state.shiftOverrides) state.shiftOverrides = {};
+  if(!state.exchangeHistory) state.exchangeHistory = [];
+  if(!state.history) state.history = {};
+
+  Object.values(state.employees).forEach(emp=>{
+    if(emp.totalEarned === undefined){
+      emp.totalEarned = emp.totalPoints || 0;
+    }
+    if(!emp.titles) emp.titles = [];
+    if(emp.streak === undefined) emp.streak = 0;
+    if(emp.lastClearDate === undefined) emp.lastClearDate = null;
+    if(emp.nightCount === undefined) emp.nightCount = 0;
+    if(emp.perfectCount === undefined) emp.perfectCount = 0;
+    if(emp.firstLoginDone === undefined) emp.firstLoginDone = false;
+    if(emp.equippedTitle === undefined){
+      emp.equippedTitle = {
+        type: "level",
+        level: 1
+      };
+    }
+  });
+
+  if(!state.today || state.today.date !== todayStr()){
+    resetToday(false);
+  }
 }
 
 if(!state.sugoroku){
   state.sugoroku = {
-    position: 0,
-    stage: 1,
-    laps: 0,
-    lastPlayDate: null,
-    tiles: [],
-bonus3Claimed: false,
-hp: 100,
-maxHp: 100,
-inCave: false
+    position:0,
+    laps:0
   };
-  generateMap();
-  save();
 }
 
-if(state.sugoroku.hp === undefined){
-  state.sugoroku.hp = 100;
-  state.sugoroku.maxHp = 100;
+function ensureTodayRecord(code){
+  if(!state.today.progress[code]){
+    state.today.progress[code]={checked:{},todayPoints:0};
+  }
 }
 
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+function getYesterdayStr(){
 
-function todayStr(){
   const d = new Date();
-  if(d.getHours() < 7) d.setDate(d.getDate()-1);
-  return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+
+  if(d.getHours() < 7){
+    d.setDate(d.getDate() - 1);
+  }
+
+  d.setDate(d.getDate() - 1);
+
+  return d.getFullYear() + "-" +
+         String(d.getMonth()+1).padStart(2,"0") + "-" +
+         String(d.getDate()).padStart(2,"0");
 }
 
-function rollDice(){
 
-  if(currentBranch){
-    showMessage("分かれ道を選んでください！");
+/* ================= LOGIN ================= */
+
+function login(){
+  playDecision();
+
+  const code = document.getElementById("loginCode").value.trim();
+if(code === "12231489"){
+  state.devMode = true;
+save();
+  showDQMessage("🛠 開発者モード ON");
+  document.getElementById("loginCode").value="";
+  return;
+}
+
+// 🛠 開発者モード OFF
+  if(code === "14891223"){
+    state.devMode = false;
+    save();
+    showDQMessage("🛠 開発者モード OFF");
+    document.getElementById("loginCode").value="";
     return;
   }
 
-  const today = todayStr();
-  const emp = state.employees[currentUser];
-  if(!emp) return;
+  if(!code){
+  showDQMessage("コードを いれてください！");
+  return;
+}
 
-  if(!devMode && emp.sugorokuLastPlayDate === today){
-    showMessage("今日はもうプレイできない！");
+  if(code === ADMIN_CODE){
+    isAdmin = true;
+    currentUser = null;
+    showAdmin();
     return;
   }
-
-  // ① 振った表示（即消える）
- const box = document.getElementById("dqMessage");
-
-box.innerHTML = "🎲";
-box.style.display = "block";
-box.classList.add("diceRoll");
-
-  const roll = Math.floor(Math.random()*6)+1;
-
-  // ② 少し待って結果表示
- setTimeout(()=>{
-
-  const box = document.getElementById("dqMessage");
-
-  box.classList.remove("diceRoll");
-
-  box.innerHTML = "🎲 " + roll + "！";
-
-    // ③ 結果メッセージが終わったら移動
-    setTimeout(()=>{
-      startMove(roll, emp, today);
-    }, 800);  // ←ここが“間”
-
-  }, 300);
-}
-
-function startMove(roll, emp, today){
-
-const player = document.getElementById("player");
-player.classList.add("walk");
-
-let steps = 0;
-
-const moveInterval = setInterval(()=>{
-
-const currentTile =
-state.sugoroku.tiles[state.sugoroku.position];
-
-if(!currentTile){
-clearInterval(moveInterval);
+if(!state.employees[code]){
+  showDQMessage("その ぼうけんしゃは いません！");
 return;
 }
 
-if(currentTile.type === "goal"){
-clearInterval(moveInterval);
-player.classList.remove("walk");
-return;
-}
+  currentUser = code;
+  isAdmin = false;
 
-// 分岐マスで止まる
-if(currentTile.type === "branch"){
-
-clearInterval(moveInterval);
-player.classList.remove("walk");
-
-handleEvent("branch");
-return;
-
-}
-
-// 次のマス
-let nextPos;
-
-if(!currentTile.next || currentTile.next.length === 0){
-
-clearInterval(moveInterval);
-player.classList.remove("walk");
-return;
-
-}
-
-nextPos = currentTile.next[0];
-
-// マップ終端安全処理
-if(nextPos >= state.sugoroku.tiles.length){
-
-clearInterval(moveInterval);
-player.classList.remove("walk");
-return;
-
-}
-
-state.sugoroku.position = nextPos;
-
-steps++;
-
-walkSE.currentTime=0;
-walkSE.play();
-
-render();
-
-// 歩数終了
-if(steps >= roll){
-
-clearInterval(moveInterval);
-player.classList.remove("walk");
-
-const tileType =
-state.sugoroku.tiles[state.sugoroku.position]?.type;
-
-setTimeout(()=>{
-
-handleEvent(tileType);
-
-},500);
-
-emp.sugorokuLastPlayDate = today;
+state.currentUser = code;
 save();
 
+localStorage.setItem("currentUserCode", code);
+
+  ensureTodayRecord(code);
+
+// 🔥 念のため今日データを保証
+if(!state.today.progress){
+  state.today.progress = {};
 }
 
-},200);
-
+if(!state.today.progress[code]){
+  state.today.progress[code] = {
+    checked:{},
+    todayPoints:0
+  };
 }
 
-function render(){
+const emp = state.employees[code];
 
-document.getElementById("stageNum").textContent = state.sugoroku.stage;
-document.getElementById("pos").textContent = state.sugoroku.position;
+if(!emp.firstLoginDone){
+  giveTitle(code, "secret_firstLogin");
+  emp.firstLoginDone = true;
+  save();
+}
+const now = new Date();
 
-const emp = state.employees[currentUser];
+if(now.getHours() === 7 && now.getMinutes() === 0){
+  giveTitle(code, "secret_earlyBird");
+}
+
+  showEmployee();   // ← 先に画面切り替え
+checkSugorokuTitles(code);
+
+  if(!isShiftDay()){
+    showDQMessage("きょうは やすみのひ だった！");
+  }
+}
+
+function logout(){
+  currentUser=null;
+  isAdmin=false;
+
+localStorage.removeItem("currentUserCode");
+
+  document.getElementById("loginCode").value="";
+  show("viewLogin");
+}
+
+/* ================= VIEW ================= */
+
+function show(id){
+
+  const views=["viewLogin","viewEmployee","viewAdmin"];
+
+  views.forEach(v=>{
+    const el=document.getElementById(v);
+    if(!el) return;
+    el.classList.add("hidden");
+  });
+
+  const target=document.getElementById(id);
+  if(target){
+    target.classList.remove("hidden");
+  }
+
+  window.scrollTo(0,0);
+}
+
+function showAdmin(){
+  show("viewAdmin");
+  showTab("adminEmployees");
+  renderAdmin();
+  renderExchangeHistory();
+  renderRanking();
+  renderHistory();   // ←追加
+}
+
+function showEmployee(){
+
+  // 🔥 先に画面を出す
+  show("viewEmployee");
+
+  // そのあと描画
+  renderEmployee();
+  renderTitles();
+  showEmpTab("empQuest");
+}
+
+function showTab(id){
+ ["adminEmployees","adminQuests","adminRewards","adminData","adminHistory","adminVersion"]
+.forEach(t=>{
+    const el=document.getElementById(t);
+    if(el) el.classList.add("hidden");
+  });
+  document.getElementById(id).classList.remove("hidden");
+ if(id === "adminHistory"){
+    renderHistory();
+  }
+if(id === "adminVersion"){
+  renderVersionInfo();
+}
+}
+
+/* ================= EMPLOYEE ================= */
+
+function renderEmployee(){
+
+  if(!currentUser) return;
+
+  // 🔥 完全保証
+  if(!state.today){
+    state.today = {
+      date: todayStr(),
+      progress:{}
+    };
+  }
+
+  if(!state.today.progress){
+    state.today.progress = {};
+  }
+
+  if(!state.today.progress[currentUser]){
+    state.today.progress[currentUser] = {
+      checked:{},
+      todayPoints:0
+    };
+  }
+
+  const rec = state.today.progress[currentUser];
+  const emp = state.employees[currentUser];
+
+  if(!emp) return;
+
+  document.getElementById("todayPoints").textContent = rec.todayPoints;
+  document.getElementById("totalPoints").textContent = emp.totalPoints || 0;
+
 const earned = emp.totalEarned || 0;
-
 const levelData = getLevelInfo(earned);
 
-document.getElementById("xp").textContent = earned;
-document.getElementById("level").textContent = levelData.level;
-document.getElementById("points").textContent = emp.totalPoints || 0;
+
+let displayTitle = "";
+
+if(emp.equippedTitle){
+
+  if(emp.equippedTitle.type === "title"){
+    const master = TITLE_MASTER[emp.equippedTitle.id];
+    displayTitle = master ? master.name : "";
+  }
+
+  if(emp.equippedTitle.type === "level"){
+    displayTitle = getTitle(emp.equippedTitle.level);
+  }
+
+}else{
+  const levelData = getLevelInfo(emp.totalEarned || 0);
+  displayTitle = levelData.title;
+}
+
+document.getElementById("levelInfo").innerHTML =
+  `Lv.${levelData.level}　
+   ${emp.name}　
+   【${displayTitle}】`;
+
+document.getElementById("expInfo").textContent =
+  `累計経験値：${earned} XP`;
 
 const nextReq = getNextLevelRequirement(earned);
 
-document.getElementById("nextXp").textContent =
-nextReq ? nextReq - earned : "MAX";
+if(nextReq){
 
-document.getElementById("laps").textContent =
-emp.sugorokuLaps || 0;
+  const remain = nextReq - earned;
 
+  document.getElementById("nextLevelInfo").textContent =
+    `次のレベルまで あと ${remain} XP`;
 
-/* ===================
-マップ描画
-=================== */
+  let currentBase = 0;
 
-const map = document.getElementById("map");
-const mapLayer = document.getElementById("mapLayer");
+  if(earned >= 1000) currentBase = 1000;
+  else if(earned >= 600) currentBase = 600;
+  else if(earned >= 300) currentBase = 300;
+  else if(earned >= 100) currentBase = 100;
 
-map.innerHTML = "";
-mapLayer.querySelectorAll(".path").forEach(p=>p.remove());
+  const percent =
+    ((earned - currentBase) / (nextReq - currentBase)) * 100;
 
-const tiles = state.sugoroku.tiles;
+  document.getElementById("expBar").style.width =
+    percent + "%";
 
+}else{
 
-/* マス生成 */
+  document.getElementById("nextLevelInfo").textContent =
+    "★ 最大レベル ★";
 
-tiles.forEach((tileData,i)=>{
-
-const tile = document.createElement("div");
-tile.className="tile";
-tile.dataset.index=i;
-
-if(i===state.sugoroku.position) tile.classList.add("active");
-if(i===tiles.length-1) tile.classList.add("goal");
-
-/* マス生成 */
-
-tiles.forEach((tileData,i)=>{
-
-const tile = document.createElement("div");
-tile.className="tile";
-tile.dataset.index=i;
-
-if(i===state.sugoroku.position) tile.classList.add("active");
-if(i===tiles.length-1) tile.classList.add("goal");
-
-switch(tileData.type){
-
-case "plus":
-tile.textContent="+";
-tile.classList.add("plus");
-break;
-
-case "minus":
-tile.textContent="-";
-tile.classList.add("minus");
-break;
-
-case "rare":
-tile.textContent="★";
-tile.classList.add("rare");
-break;
-
-case "boss":
-tile.textContent="⚔";
-tile.classList.add("boss");
-break;
-
-case "heal":
-tile.textContent="❤";
-tile.classList.add("heal");
-break;
-
-case "cave":
-tile.innerHTML="<img src='cave.png' width='30'>";
-tile.classList.add("cave");
-break;
-
-case "exit":
-tile.textContent="🚪";
-tile.classList.add("exit");
-break;
-
-case "branch":
-tile.textContent="↔";
-tile.classList.add("branch");
-break;
-
-default:
-tile.textContent="";
+  document.getElementById("expBar").style.width = "100%";
 }
 
-tile.style.left = tileData.x*70+"px";
-tile.style.top = tileData.y*70+"px";
+  const list=document.getElementById("questList");
+  list.innerHTML="";
 
-map.appendChild(tile);
+  state.quests.forEach(q=>{
+    const done=!!rec.checked[q.id];
+    const row=document.createElement("div");
+    row.className="item";
+    row.innerHTML=`<div><strong>${q.title}</strong> <span class="badge">${q.points}pt</span></div>`;
 
-});
+    const btn=document.createElement("button");
 
+if(done){
+  btn.textContent="✓ 完了";
+  btn.className="ghost";
+  btn.disabled=true;
+}else{
+  btn.textContent="たたかう";
+  btn.className="primary";
+  btn.disabled=false;
+}
 
-/* ===================
-道（path）描画
-=================== */
+btn.onclick=()=>toggleQuest(q.id);
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
 
-tiles.forEach(tileData=>{
-
-if(!tileData.next) return;
-
-tileData.next.forEach(nextIndex=>{
-
-const nextTile = tiles[nextIndex];
-if(!nextTile) return;
-
-const x1 = tileData.x*70+24;
-const y1 = tileData.y*70+24;
-
-const x2 = nextTile.x*70+24;
-const y2 = nextTile.y*70+24;
-
-const dx = x2-x1;
-const dy = y2-y1;
-
-const length = Math.sqrt(dx*dx+dy*dy);
-const angle = Math.atan2(dy,dx)*180/Math.PI;
-
-const path = document.createElement("div");
-path.className="path";
-
-path.style.left=x1+"px";
-path.style.top=y1+"px";
-path.style.width=length+"px";
-path.style.transform=`rotate(${angle}deg)`;
-
-mapLayer.appendChild(path);
-
-});
-
-});
-
-
-/* ===================
-プレイヤー
-=================== */
-
-const player=document.getElementById("player");
-const tileData = tiles[state.sugoroku.position];
-
-if(!tileData) return;
-
-player.style.left = (tileData.x*70+24)+"px";
-player.style.top = (tileData.y*70+16)+"px";
-
-
-/* ===================
-カメラ
-=================== */
-
-if(!fullMap){
-
-const mapView=document.querySelector(".map");
-
-const px = tileData.x*70+24;
-const py = tileData.y*70+24;
-
-const viewWidth = mapView.clientWidth;
-const viewHeight = mapView.clientHeight;
-
-const cameraX = px-viewWidth/2;
-const cameraY = py-viewHeight/2;
-
-mapLayer.style.transform =
-`translate(${-cameraX}px,${-cameraY}px)`;
-
+  showRewardShop();
+renderEmployeeRanking();
+renderTitles();
 }
 
 
-/* ===================
-HP
-=================== */
 
-const hpPercent =
-(state.sugoroku.hp/state.sugoroku.maxHp)*100;
+/* ================= ADMIN ================= */
 
-document.getElementById("hpBar").style.width =
-hpPercent+"%";
+function addEmployee(){
+  const code=document.getElementById("empCode").value.trim();
+  const name=document.getElementById("empName").value.trim();
+  const shift=document.getElementById("empShiftName").value.trim();
 
+  if(!code||!name||!shift) return alert("入力してください");
+  if(state.employees[code]) return alert("既に存在します");
 
-/* ===================
-ミニマップ
-=================== */
+state.employees[code]={
+  name,
+  shiftName:shift,
+  totalPoints:0,
+  totalEarned:0,
+  streak:0,
+  lastClearDate:null,
+  nightCount:0,
+  perfectCount:0,
+  firstLoginDone:false,
+  titles:[],
+  equippedTitle:{
+    type:"level",
+    level:1 // ←追加
+}
+};
 
-drawMiniMap();
+   save();
+  renderAdmin();
 
-/* ===================
-森
-=================== */
+document.getElementById("empCode").value = "";
+document.getElementById("empName").value = "";
+document.getElementById("empShiftName").value = "";
 
-drawTrees();
+document.getElementById("empCode").focus();
 }
 
-function generateMap(){
-
-const stage = state.sugoroku.stage;
-const path = STAGE_PATH[stage];
-
-state.sugoroku.tiles = [];
-
-path.forEach((pos,i)=>{
-
-let type = "none";
-let next = [i+1];
-
-if(i===0){
-type="start";
+function addQuest(){
+  const title=document.getElementById("qTitle").value.trim();
+  const points=parseInt(document.getElementById("qPoints").value,10);
+  if(!title||isNaN(points)) return alert("入力してください");
+  state.quests.push({id:"q"+Date.now(),title,points});
+  save();
+  renderAdmin();
+document.getElementById("qTitle").value = "";
+document.getElementById("qPoints").value = "";
+document.getElementById("qTitle").focus();
 }
 
-if(i===path.length-1){
-type="goal";
-next=[];
-}
+function handleEmpCodeKey(e){
 
-state.sugoroku.tiles.push({
-x:pos[0],
-y:pos[1],
-type:type,
-next:next
-});
+  if(e.key === "Enter"){
 
-});
+    const input = document.getElementById("empCode");
 
-/* 分岐ランダム生成 */
+    // 数字以外を削除（念のため）
+    input.value = input.value.replace(/\D/g,'');
 
-/* 隠しルート生成 */
+    if(input.value.length === 7){
 
-const hiddenCount = Math.floor(path.length/15);
+      // 名前欄へ移動
+      document.getElementById("empName").focus();
 
-for(let i=0;i<hiddenCount;i++){
+    }else{
 
-const pos = Math.floor(Math.random()*(path.length-10))+5;
+      alert("従業員コードは7桁で入力してください");
 
-const tile = state.sugoroku.tiles[pos];
-
-if(!tile || tile.type!=="none") continue;
-
-tile.type="hidden";
-
-}
-
-const branchCount = Math.floor(path.length/10);
-
-for(let i=0;i<branchCount;i++){
-
-const pos = Math.floor(Math.random()*(path.length-10))+3;
-
-const tile = state.sugoroku.tiles[pos];
-
-if(!tile || tile.type!=="none") continue;
-
-tile.type="branch";
-
-const branchIndex = state.sugoroku.tiles.length;
-
-/* 分岐ルート */
-
-const bx = tile.x;
-const by = tile.y+1;
-
-state.sugoroku.tiles.push({
-x:bx,
-y:by,
-type:"none",
-next:[Math.min(pos+4, path.length-1)]
-});
-
-/* 2ルート */
-
-tile.next=[pos+1,branchIndex];
-
-/* ルートタイプ */
-
-const types=["safe","danger","treasure"];
-
-tile.routeType=[
-types[Math.floor(Math.random()*types.length)],
-types[Math.floor(Math.random()*types.length)]
-];
-
-}
-
-/* ゴール処理 */
-
-state.sugoroku.tiles[path.length-1].next=[];
-
-
-/* マスイベントランダム */
-
-const rate = STAGE_TILE_RATE[stage];
-
-state.sugoroku.tiles.forEach(tile=>{
-
-if(tile.type!=="none") return;
-
-const r=Math.random();
-
-if(r<rate.plus) tile.type="plus";
-else if(r<rate.plus+rate.minus) tile.type="minus";
-else if(r<rate.plus+rate.minus+rate.rare) tile.type="rare";
-else if(r<rate.plus+rate.minus+rate.rare+rate.heal) tile.type="heal";
-else if(r<rate.plus+rate.minus+rate.rare+rate.heal+rate.boss) tile.type="boss";
-else if(r<rate.plus+rate.minus+rate.rare+rate.heal+rate.boss+rate.cave) tile.type="cave";
-
-});
-
-}
-function generateCave(){
-let x = 0;
-let y = 0;
-  state.sugoroku.tiles = [];
-
-  for(let i=0;i<20;i++){
-x += 1;
-
-if(Math.random() < 0.4){
-  y += 1;
-}
-
-    if(i === 19){
-      state.sugoroku.tiles.push({
-        type:"exit",
-        next:[i+1],
-x:x,
-  y:y
-      });
-      continue;
     }
+  }
+}
 
-    const rand = Math.random();
+function handleEmpNameKey(e){
 
-    if(rand < 0.15){
-      state.sugoroku.tiles.push({
-        type:"treasure",
-        next:[i+1],
-x:x,
-  y:y
-      });
-    }
-    else if(rand < 0.35){
-      state.sugoroku.tiles.push({
-        type:"minus",
-        next:[i+1],
-x:x,
-  y:y
-      });
-    }
-    else if(rand < 0.55){
-      state.sugoroku.tiles.push({
-        type:"boss",
-        next:[i+1],
-x:x,
-  y:y
-      });
-    }
-    else if(rand < 0.70){
-      state.sugoroku.tiles.push({
-        type:"rare",
-        next:[i+1],
-x:x,
-  y:y
-      });
-    }
-    else{
-      state.sugoroku.tiles.push({
-        type:"none",
-        next:[i+1],
-x:x,
-  y:y
-      });
-    }
+  if(e.key === "Enter"){
 
+    document.getElementById("empShiftName").focus();
+  }
+}
+
+function handleEmpShiftKey(e){
+
+  if(e.key === "Enter"){
+
+    addEmployee();   // 追加実行
+  }
+}
+
+function renderAdmin(){
+
+  /* ===== 従業員 ===== */
+  const empList = document.getElementById("employeeList");
+  empList.innerHTML = "";
+
+  Object.entries(state.employees).forEach(([code,emp])=>{
+
+    const row = document.createElement("div");
+    row.className = "item";
+
+    row.innerHTML = `
+      <div>
+        <strong>${emp.name}</strong> (${code})
+        <span class="badge">${emp.totalPoints || 0}pt</span>
+      </div>
+    `;
+
+const edit = document.createElement("button");
+edit.textContent = "編集";
+
+edit.onclick = ()=>{
+
+  openModal({
+    title:"従業員編集",
+    fields:[
+      { label:"名前", key:"name", value:emp.name },
+      { label:"シフト苗字", key:"shiftName", value:emp.shiftName }
+    ],
+    onSave:(data)=>{
+      emp.name = data.name.trim();
+      emp.shiftName = data.shiftName.trim();
+      save();
+      renderAdmin();
+    }
+  });
+
+};
+
+row.appendChild(edit);
+
+    const del = document.createElement("button");
+    del.textContent = "削除";
+    del.className = "warn";
+
+    del.onclick = ()=>{
+      if(confirm("本当に削除しますか？")){
+        delete state.employees[code];
+        delete state.today.progress[code];
+        save();
+        renderAdmin();
+      }
+    };
+
+    row.appendChild(del);
+    empList.appendChild(row);
+  });
+
+  /* ===== クエスト ===== */
+  const questList = document.getElementById("questAdminList");
+  if(questList){
+    questList.innerHTML = "";
+
+    state.quests.forEach(q=>{
+      const row = document.createElement("div");
+      row.className = "item";
+
+      row.innerHTML = `
+        <div>
+          <strong>${q.title}</strong>
+          <span class="badge">${q.points}pt</span>
+        </div>
+      `;
+
+const edit = document.createElement("button");
+edit.textContent = "編集";
+
+edit.onclick = ()=>{
+
+  openModal({
+    title:"クエスト編集",
+    fields:[
+      { label:"クエスト名", key:"title", value:q.title },
+      { label:"ポイント", key:"points", value:q.points }
+    ],
+    onSave:(data)=>{
+
+      q.title = data.title.trim();
+      q.points = parseInt(data.points,10) || 0;
+
+      save();
+      renderAdmin();
+      renderEmployee(); // 表示中の人にも反映
+    }
+  });
+
+};
+
+row.appendChild(edit);
+
+      const del = document.createElement("button");
+      del.textContent = "削除";
+      del.className = "warn";
+
+      del.onclick = ()=>{
+        if(confirm("本当に削除しますか？")){
+          state.quests = state.quests.filter(x=>x.id!==q.id);
+
+          // 進捗からも削除
+          Object.values(state.today.progress).forEach(p=>{
+            delete p.checked[q.id];
+          });
+
+          save();
+          renderAdmin();
+        }
+      };
+      row.appendChild(del);
+      questList.appendChild(row);
+    });
+  }
+renderAdminRewards();
   }
 
+function renderAdminRewards(){
+  const list = document.getElementById("rewardAdminList");
+  if(!list) return;
 
+  list.innerHTML = "";
+
+  state.rewards.forEach(r=>{
+
+    const row = document.createElement("div");
+    row.className = "item";
+
+    row.innerHTML = `
+      <div>
+        <strong>${r.title}</strong>
+        <span class="badge">${r.cost}pt</span>
+      </div>
+    `;
+
+const edit = document.createElement("button");
+edit.textContent = "編集";
+
+edit.onclick = ()=>{
+
+  openModal({
+    title:"景品編集",
+    fields:[
+      { label:"景品名", key:"title", value:r.title },
+      { label:"必要ポイント", key:"cost", value:r.cost }
+    ],
+    onSave:(data)=>{
+
+      r.title = data.title.trim();
+      r.cost = parseInt(data.cost,10) || 0;
+
+      save();
+      renderAdminRewards();
+      showRewardShop(); // 従業員画面にも反映
+    }
+  });
+
+};
+
+row.appendChild(edit);
+
+    const del = document.createElement("button");
+    del.textContent = "削除";
+    del.className = "warn";
+
+    del.onclick = ()=>{
+      if(confirm("本当に削除しますか？")){
+        state.rewards = state.rewards.filter(x=>x.id!==r.id);
+        save();
+        renderAdminRewards();
+      }
+    };
+
+    row.appendChild(del);
+    list.appendChild(row);
+  });
 }
-function handleEvent(type){
 
-  if(!currentUser || !state.employees[currentUser]){
-    alert("ログイン情報がありません");
-    return;
-  }
-let routeEffect=null;
+/* ================= REWARDS ================= */
 
-if(currentBranch && currentBranch.routeType){
-routeEffect=currentBranch.routeType[0];
+function addReward(){
+  const title=document.getElementById("rewardTitle").value.trim();
+  const cost=parseInt(document.getElementById("rewardCost").value,10);
+  if(!title||isNaN(cost)) return alert("入力してください");
+  state.rewards.push({id:"r"+Date.now(),title,cost});
+  save();
+  renderAdminRewards();
+document.getElementById("rewardTitle").value = "";
+document.getElementById("rewardCost").value = "";
+document.getElementById("rewardTitle").focus();
 }
+
+
+function showRewardShop(){
+  const shop=document.getElementById("rewardShop");
+  if(!shop||!currentUser) return;
+  shop.innerHTML="";
+  const pt=state.employees[currentUser].totalPoints;
+
+  state.rewards.forEach(r=>{
+    const row=document.createElement("div");
+    row.className="item";
+    row.innerHTML=`<div><strong>${r.title}</strong> <span class="badge">${r.cost}pt</span></div>`;
+   const btn=document.createElement("button");
+
+if(pt < r.cost){
+  btn.textContent="交換";
+  btn.className="primary";
+}else{
+  btn.textContent="交換";
+  btn.className="primary";
+}
+
+btn.onclick=()=>exchangeReward(r.id);
+    row.appendChild(btn);
+    shop.appendChild(row);
+  });
+}
+
+function exchangeReward(id){
+
+  const r = state.rewards.find(x=>x.id===id);
+  if(!r) return;
 
   const emp = state.employees[currentUser];
 
-if(type === "goal"){
-
-showMessage("🏁 ゴール！");
-
-state.sugoroku.stage++;
-
-if(state.sugoroku.stage>5){
-state.sugoroku.stage=1;
-state.employees[currentUser].sugorokuLaps++;
+if(emp.totalPoints < r.cost){
+  giveTitle(currentUser, "secret_noPoint");
+  showDQMessage("ポイントが たりない！");
+  return;
 }
 
-generateMap();
-state.sugoroku.position=0;
+  if(!confirm(`${r.title} を交換しますか？`)) return;
 
-save();
-render();
+  emp.totalPoints -= r.cost;
 
-}
-
-if(type === "hidden"){
-
-showMessage("❓ なにかが起きそうだ…");
-
-const r = Math.random();
-
-if(r < 0.4){
-showMessage("🎁 宝ルート発見！");
-handleEvent("rare");
-}
-else if(r < 0.7){
-showMessage("💰 ボーナス発見！");
-handleEvent("plus");
-}
-else{
-showMessage("💀 トラップ！");
-handleEvent("minus");
-}
-
-}
-
-if(type === "plus"){
-
-  state.employees[currentUser].totalPoints += 10;
-  state.employees[currentUser].totalEarned += 10;
+  state.exchangeHistory.push({
+    name: emp.name,
+    code: currentUser,
+    reward: r.title,
+    cost: r.cost,
+    datetime: new Date().toLocaleString("ja-JP")
+  });
 
   save();
-
-  showMessage("💰 10ポイント獲得！");
+  renderEmployee();
+  showDQMessage(
+  `${r.title} を てにいれた！`
+);
 }
 
-if(type === "minus"){
+/* ================= CSV ================= */
 
-  state.employees[currentUser].totalPoints -= 5;
+function exportEmployeesToCSV(){
+  const rows=[["名前","コード","累計ポイント"]];
+  Object.entries(state.employees).forEach(([code,emp])=>{
+    rows.push([emp.name,code,emp.totalPoints||0]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="employees.csv";a.click();
+  URL.revokeObjectURL(url);
+}
 
-  if(state.employees[currentUser].totalPoints < 0){
-    state.employees[currentUser].totalPoints = 0;
+function openShiftCSV(){
+  document.getElementById("shiftCsvInput").click();
+}
+
+function loadShiftCSV(file){
+  if(!file) return;
+
+  const reader=new FileReader();
+  reader.onload=()=>{
+    parseShiftCSV(reader.result);
+    alert("シフトCSV読み込み完了");
+  };
+  reader.readAsText(file,"utf-8");
+}
+
+/* ================= DATA ================= */
+
+function resetToday(ask=true){
+
+  if(ask && !confirm("リセットしますか？")) return;
+
+  const oldDate = state.today?.date;
+
+  if(oldDate && state.today.progress){
+
+    // 今日のデータを履歴に保存
+    state.history[oldDate] = JSON.parse(
+      JSON.stringify(state.today.progress)
+    );
   }
 
-  save();
-
-  showMessage("❌ 5ポイント失った！");
-}
-
-if(type === "rare"){
-
-  if(currentUser && state.employees[currentUser]){
-
-    const chance = Math.random();
-
-    if(chance < 0.2){
-
-      // 🔥 超ボーナス
-      state.employees[currentUser].totalPoints += 100;
-      state.employees[currentUser].totalEarned += 100;
-
-      save();
-
-      showMessage("🌟🌟 超レア発動！100ポイント獲得！！", "rare");
-
-    }else{
-
-      // 通常レア
-      state.employees[currentUser].totalPoints += 30;
-      state.employees[currentUser].totalEarned += 30;
-
-      save();
-
-      showMessage("⭐ レアマス！30ポイント獲得！", "rare");
-    }
-  }
-}
-
-if(type === "treasure"){
-
-  showMessage("🎁 宝箱を発見！");
-
-  const rand = Math.random();
-
-  if(rand < 0.6){
-
-    const gold = 30 + Math.floor(Math.random()*40);
-
-    state.employees[currentUser].totalPoints += gold;
-    state.employees[currentUser].totalEarned += gold;
-
-    showMessage("💰 " + gold + "ポイント手に入れた！");
-
-  }
-  else if(rand < 0.9){
-
-    showMessage("🎁 空っぽだった…");
-
-  }
-  else{
-
-    state.employees[currentUser].totalPoints += 200;
-    state.employees[currentUser].totalEarned += 200;
-
-    showMessage("🌟 超レア宝箱！200ポイント！！","rare");
-
-  }
-
-  save();
-}
-
-if(type === "exit"){
-
-  showMessage("🚪 洞窟を脱出した！");
-
-  state.sugoroku.inCave = false;
-
-  generateMap();
-
-  state.sugoroku.position = 0;
-
-  save();
-  render();
-}
-
-if(type === "cave"){
-
-  showMessage("🕳 洞窟を発見した！");
-
-  setTimeout(()=>{
-
-    const enter = confirm("洞窟に入りますか？");
-
-    if(enter){
-
-    showMessage("🕳 洞窟に入った！");
-
-state.sugoroku.inCave = true;
-generateCave();
-state.sugoroku.position = 0;
-
-save();
-render();
-
-    }else{
-
-      showMessage("外を進むことにした");
-
-    }
-
-  },1000);
-
-}
-
-if(type === "branch"){
-
-  currentBranch = state.sugoroku.tiles[state.sugoroku.position];
-
-  const routes = currentBranch.routeType || ["normal","normal"];
-
-  const labels = {
-    safe:"🛡 安全ルート",
-    danger:"⚔ 危険ルート",
-    treasure:"🎁 宝ルート",
-    normal:"一本道"
+  // 新しい日付に切り替え
+  state.today = {
+    date: todayStr(),
+    progress:{}
   };
 
-  document.getElementById("branchBtn0").textContent =
-    labels[routes[0]];
-
-  document.getElementById("branchBtn1").textContent =
-    labels[routes[1]];
-
-const mapLayer = document.getElementById("mapLayer");
-
-mapLayer.classList.add("zoomFocus");
-  document.getElementById("branchUI").style.display = "block";
-
-}
-
-
-
-if(type === "boss"){
-
-const stage = state.sugoroku.stage;
-const data = STAGE_DATA[stage];
-
-  const chance = Math.random();
-
-
- if(chance < data.bossWinRate){
-
-    emp.totalPoints += 80;
-    emp.totalEarned += 80;
-
-    document.body.classList.add("bossFlashWin");
-    setTimeout(()=>{
-      document.body.classList.remove("bossFlashWin");
-    }, 800);
-
-    showMessage("⚔ ボス撃破！80ポイント獲得！", "rare");
-
-  }else{
-
-    emp.totalPoints -= 20;
-    if(emp.totalPoints < 0) emp.totalPoints = 0;
-
-state.sugoroku.hp -= data.bossDamage;
-if(state.sugoroku.hp < 0){
-  state.sugoroku.hp = 0;
-}
-
-    document.body.classList.add("bossFlashLose");
-    setTimeout(()=>{
-      document.body.classList.remove("bossFlashLose");
-    }, 800);
-
-
-    showMessage("💀 ボスに敗北…20ポイント減少");
-  }
-
-  save();
-render();
-}
-
-if(type === "heal"){
-
-const stage = state.sugoroku.stage;
-const data = STAGE_DATA[stage];
-
-  state.sugoroku.hp += data.healAmount;
-
-  if(state.sugoroku.hp > state.sugoroku.maxHp){
-    state.sugoroku.hp = state.sugoroku.maxHp;
-  }
-
-  showMessage("❤ HPが" + data.healAmount + "回復した！");
-
-  save();
-  render();
-}
-
-}
-
-function showMessage(text, type="normal"){
-
-  messageQueue.push({text, type});
-
-  if(!isShowingMessage){
-    processMessageQueue();
-  }
-}
-
-function processMessageQueue(){
-
-  if(messageQueue.length === 0){
-    isShowingMessage = false;
-    return;
-  }
-
-  isShowingMessage = true;
-
-  const {text, type} = messageQueue.shift();
-
-  const box = document.getElementById("dqMessage");
-
-  box.innerHTML = text;
-  box.style.display = "block";
-
-  box.classList.remove("bigMessage");
-
-  if(type === "rare"){
-    box.classList.add("bigMessage");
-    document.body.classList.add("rareFlash");
-
-    setTimeout(()=>{
-      document.body.classList.remove("rareFlash");
-    },800);
-  }
-
-  setTimeout(()=>{
-    box.style.display = "none";
-    processMessageQueue();
-  },2500);
-}
-
-function devRoll(){
-
-  const val = parseInt(
-    document.getElementById("devSteps").value
-  );
-
-  if(isNaN(val)) return;
-
-  state.sugoroku.position += val;
-
-  const length = STAGE_MAP_LENGTH[state.sugoroku.stage];
-
-if(state.sugoroku.position >= length){
-    state.sugoroku.position = 0;
-    state.sugoroku.laps += 1;
-  }
-
-  render();
   save();
 }
 
-function forceGoal(){
-
-const length = STAGE_MAP_LENGTH[state.sugoroku.stage];
-
-state.sugoroku.position = length - 1;
-
-  render();
-  save();
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="data.json";a.click();
+  URL.revokeObjectURL(url);
 }
 
-function warpTo(num){
-  state.sugoroku.position = num;
-  render();
-  save();
+function importData(){
+  const file=document.getElementById("importFile").files[0];
+  if(!file) return alert("ファイル選択してください");
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+    try{
+      const data = JSON.parse(reader.result);
+
+      // 👇 配列だった場合
+      if(Array.isArray(data)){
+
+        data.forEach(emp=>{
+
+          const code = String(emp.id); // ←ここ超重要
+
+          state.employees[code] = {
+            name: emp.name,
+            shiftName: emp.shiftName,
+            totalPoints: 0,
+            totalEarned: 0,
+            streak: 0,
+            lastClearDate: null,
+            nightCount: 0,
+            perfectCount: 0,
+            firstLoginDone: false,
+            titles: [],
+            equippedTitle:{
+              type:"level",
+              level:1
+            }
+          };
+
+        });
+
+      }else{
+        state = data;
+      }
+
+      save();
+      alert("読み込み成功");
+      renderAdmin();
+
+    }catch(e){
+      alert("読み込み失敗");
+    }
+  };
+
+  reader.readAsText(file);
 }
 
-if(!state.sugoroku.tiles || state.sugoroku.tiles.length === 0){
-  generateMap();
+/* ================= SHIFT MANUAL ================= */
+
+function addManualShift(){
+  const name=document.getElementById("manualShiftName").value.trim();
+  const date=document.getElementById("manualShiftDate").value;
+  if(!name||!date) return alert("入力してください");
+  const ymd=date.replace(/-/g,"/");
+  if(!state.shiftOverrides[name]) state.shiftOverrides[name]={};
+  state.shiftOverrides[name][ymd]=true;
   save();
+  alert(`${name} の ${ymd} を出勤扱いにしました`);
 }
 
-render();
+/* ================= KEYPAD ================= */
 
-function devTrigger(type){
+/* ===== KEYPAD ===== */
+
+function addNum(n){
+  playCursor();  // ←追加
+  document.getElementById("loginCode").value+=n;
+}
+
+function clearCode(){
+  playCursor();  // ←追加
+  document.getElementById("loginCode").value="";
+}
+
+function backspace(){
+  playCursor();  // ←追加
+  const input=document.getElementById("loginCode");
+  input.value=input.value.slice(0,-1);
+}
+
+/* ================= INIT ================= */
+
+load();
+show("viewLogin");
+
+function isShiftDay(){
 
   const emp = state.employees[currentUser];
-  if(!emp) return;
+  if(!emp || !emp.shiftName) return false;
 
-  if(type === "goal"){
-    state.sugoroku.position = 29;
-    render();
-    showMessage("🏁 強制ゴール！");
+  // ⭐ ここを変更
+  const today = todayStr().replace(/-/g,"/");
+  const name = emp.shiftName.trim();
+
+  // 手動優先
+  if(state.shiftOverrides[name] &&
+     state.shiftOverrides[name][today]){
+    return true;
+  }
+
+  // CSV判定
+  if(state.shiftTable[name] &&
+     state.shiftTable[name][today]){
+    return true;
+  }
+
+  return false;
+}
+
+function parseShiftCSV(text){
+
+  const rows = text.split("\n").map(r=>r.split(","));
+
+  if(rows.length < 3){
+    alert("CSV形式が不正です");
     return;
   }
 
-  handleEvent(type);
-}
+  const dates = rows[0].slice(1).map(d=>d.trim().replace(/-/g,"/"));
 
-function devHp(amount){
+  const table = {};
 
-  state.sugoroku.hp += amount;
+  for(let i=2;i<rows.length;i++){
+    const row = rows[i];
+    const name = row[0]?.trim();
+    if(!name) continue;
 
-  if(state.sugoroku.hp > state.sugoroku.maxHp){
-    state.sugoroku.hp = state.sugoroku.maxHp;
+    table[name]={};
+
+    for(let j=1;j<row.length;j++){
+      const cell = row[j]?.trim();
+      if(cell && /[A-Za-z]/.test(cell)){
+        table[name][dates[j-1]] = true;
+      }
+    }
   }
 
-  if(state.sugoroku.hp < 0){
-    state.sugoroku.hp = 0;
+  state.shiftTable = table;
+  save();
+}
+function renderExchangeHistory(){
+
+  const list = document.getElementById("exchangeHistoryList");
+  if(!list) return;
+
+  list.innerHTML = "";
+
+  if(!state.exchangeHistory.length){
+    list.innerHTML = "<div class='muted'>履歴はまだありません</div>";
+    return;
   }
 
-  render();
-  save();
+  // 新しい順に表示
+const reversed = [...state.exchangeHistory]
+  .reverse()
+  .slice(0,3);
+
+  reversed.forEach(h=>{
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `
+      <div>
+        <strong>${h.name}</strong>（${h.code}）<br>
+        ${h.reward} - ${h.cost}pt<br>
+        <span class="muted">${h.datetime}</span>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+function getWeekday(dateStr){
+
+  const d = new Date(dateStr);
+  const days = ["日","月","火","水","木","金","土"];
+
+  return days[d.getDay()];
 }
 
-function devFullHp(){
-  state.sugoroku.hp = state.sugoroku.maxHp;
-  render();
-  save();
+function renderHistory(){
+
+  const container = document.getElementById("historyList");
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const dates = Object.keys(state.history)
+  .sort()
+  .reverse()
+  .slice(0,3);
+
+  if(!dates.length){
+    container.innerHTML = "<div>履歴はまだありません</div>";
+    return;
+  }
+
+  dates.forEach(date=>{
+
+    const weekday = getWeekday(date);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `<strong>${date}（${weekday}）</strong>`;
+
+    const dayData = state.history[date];
+let totalEmployees = 0;
+let fullClearCount = 0;
+
+ Object.entries(dayData).forEach(([code,rec])=>{
+
+  totalEmployees++;
+
+  const emp = state.employees[code];
+  const name = emp ? emp.name : code;
+
+  const empDiv = document.createElement("div");
+  empDiv.style.marginTop="8px";
+
+  let fullClear = true;
+
+  state.quests.forEach(q=>{
+    const done = rec.checked[q.id];
+    if(!done) fullClear = false;
+  });
+
+  if(fullClear){
+    fullClearCount++;
+  }
+
+  empDiv.innerHTML += `<div><strong>${name}</strong></div>`;
+
+  state.quests.forEach(q=>{
+    const done = rec.checked[q.id];
+    empDiv.innerHTML += `
+      <div>
+        ${done ? "✅" : "❌"} ${q.title}
+      </div>
+    `;
+  });
+
+  empDiv.innerHTML += `
+    <div>全制覇：${fullClear ? "🏆 YES" : "ー"}</div>
+  `;
+
+  card.appendChild(empDiv);
+
+});   // ← ここでループ終了
+
+
+
+// ⭐⭐ ここからが外 ⭐⭐
+
+if(totalEmployees > 0){
+
+  const rate = Math.round(
+    (fullClearCount / totalEmployees) * 100
+  );
+
+  const rateDiv = document.createElement("div");
+  rateDiv.style.marginTop = "10px";
+
+  rateDiv.innerHTML =
+    `<strong>全制覇率：${rate}%（${fullClearCount}/${totalEmployees}人）</strong>`;
+
+  card.appendChild(rateDiv);
 }
 
-function regenerateMap(){
-
-  generateMap();
-
-  state.sugoroku.position = 0;
-
-  showMessage("🗺 マップを再生成した！");
-
-  save();
-  render();
+    container.appendChild(card);
+  });
 }
 
-function getRequiredExp(level){
-  return level * level * 10;
+function exportExchangeHistoryCSV(){
+
+  if(!state.exchangeHistory.length){
+    alert("履歴がありません");
+    return;
+  }
+
+  const rows = [["名前","コード","景品","使用ポイント","日時"]];
+
+  state.exchangeHistory.forEach(h=>{
+    rows.push([h.name,h.code,h.reward,h.cost,h.datetime]);
+  });
+
+  const csv = rows.map(r =>
+    r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")
+  ).join("\n");
+
+  const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url;
+  a.download="exchange_history.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderRanking(){
+
+  const container = document.getElementById("rankingList");
+  if(!container) return;
+
+  container.innerHTML="";
+
+const arr = Object.entries(state.employees)
+  .map(([code,emp])=>({
+    code,
+    name:emp.name,
+    pt:emp.totalPoints||0,
+    laps: emp.sugorokuLaps || 0
+  }))
+
+    .sort((a,b)=>{
+  if(b.pt !== a.pt){
+    return b.pt - a.pt;
+  }
+  return b.laps - a.laps;
+})
+    .slice(0,3);
+
+  arr.forEach((e,i)=>{
+
+    const emp = state.employees[e.code];
+
+    let titleText = "";
+    let rarityClass = "title-R";
+
+    if(emp.equippedTitle){
+
+      if(emp.equippedTitle.type === "title"){
+        const master = TITLE_MASTER[emp.equippedTitle.id];
+        if(master){
+          titleText = master.name;
+          rarityClass = "title-" + master.rarity;
+        }
+      }
+
+      if(emp.equippedTitle.type === "level"){
+        titleText = getTitle(emp.equippedTitle.level);
+
+        const lv = emp.equippedTitle.level;
+        if(lv >= 90) rarityClass="title-UR";
+        else if(lv >= 70) rarityClass="title-SSR";
+        else if(lv >= 50) rarityClass="title-SR";
+      }
+
+    }
+
+    const row = document.createElement("div");
+    row.className="item";
+
+   const levelData = getLevelInfo(emp.totalEarned || 0);
+
+row.innerHTML = `
+  <div>
+    ${i+1}位 🏆 Lv.${levelData.level} ${e.name}
+    <div class="${rarityClass}" style="font-size:12px;">
+      【${titleText}】
+    </div>
+
+    <span class="badge">${e.pt}pt</span>
+<div style="font-size:12px;">
+  🎲 ${e.laps}周
+</div>
+  </div>
+`;
+
+    container.appendChild(row);
+  });
+}
+
+function renderEmployeeRanking(){
+
+  const container = document.getElementById("rankingListEmployee");
+  if(!container) return;
+
+  container.innerHTML="";
+
+const arr = Object.entries(state.employees)
+  .map(([code,emp])=>({
+    code,
+    name:emp.name,
+    pt:emp.totalPoints||0,
+    laps: emp.sugorokuLaps || 0
+  }))
+       .sort((a,b)=>{
+  if(b.pt !== a.pt){
+    return b.pt - a.pt;
+  }
+  return b.laps - a.laps;
+})
+
+  arr.forEach((e,i)=>{
+
+    const emp = state.employees[e.code];
+
+    let titleText = "";
+    let rarityClass = "title-R";
+
+    if(emp.equippedTitle){
+
+      if(emp.equippedTitle.type === "title"){
+        const master = TITLE_MASTER[emp.equippedTitle.id];
+        if(master){
+          titleText = master.name;
+          rarityClass = "title-" + master.rarity;
+        }
+      }
+
+      if(emp.equippedTitle.type === "level"){
+        titleText = getTitle(emp.equippedTitle.level);
+
+        const lv = emp.equippedTitle.level;
+        if(lv >= 90) rarityClass="title-UR";
+        else if(lv >= 70) rarityClass="title-SSR";
+        else if(lv >= 50) rarityClass="title-SR";
+      }
+
+    }else{
+      const levelInfo = getLevelInfo(emp.totalEarned || 0);
+      titleText = levelInfo.title;
+    }
+
+    // ⭐ ここで先にレベル取得
+    const levelData = getLevelInfo(emp.totalEarned || 0);
+
+    const row = document.createElement("div");
+    row.className="item";
+
+    if(e.code === currentUser){
+      row.style.background = "#1e3a8a";
+    }
+
+    row.innerHTML = `
+      <div>
+        ${i+1}位 Lv.${levelData.level} ${e.name}
+        <div class="${rarityClass}" style="font-size:12px;">
+          【${titleText}】
+        </div>
+        <span class="badge">${e.pt}pt</span>
+<div style="font-size:12px;">
+  🎲 ${e.laps}周
+</div>
+      </div>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+function renderTitles(){
+
+  const container = document.getElementById("titleList");
+  if(!container || !currentUser) return;
+
+  const emp = state.employees[currentUser];
+
+  const progressText = document.getElementById("titleProgress");
+  const bar = document.getElementById("titleBar");
+
+  const totalTitles = Object.keys(TITLE_MASTER)
+    .filter(id => id !== "secret_master").length;
+
+  const owned = emp.titles ? emp.titles.length : 0;
+  const percent = Math.floor((owned / totalTitles) * 100);
+
+  progressText.innerHTML =
+    `称号コンプ率：${owned} / ${totalTitles}（${percent}%）`;
+
+  bar.style.width = percent + "%";
+
+  container.innerHTML = "";
+
+// ===== レベル称号一覧 =====
+
+const currentLevel = getLevelInfo(emp.totalEarned || 0).level;
+
+const levelMilestones = [10,30,50,70,90];
+
+levelMilestones.forEach(lv=>{
+
+  if(currentLevel < lv) return; // 未到達は出さない
+
+  const row = document.createElement("div");
+  row.className = "item";
+  row.style.cursor = "pointer";
+
+  let rarityClass = "title-R";
+
+  if(lv >= 90) rarityClass="title-UR";
+  else if(lv >= 70) rarityClass="title-SSR";
+  else if(lv >= 50) rarityClass="title-SR";
+
+  row.innerHTML = `
+    <div class="${rarityClass}">
+      ⭐ Lv.${lv}称号
+      【${getTitle(lv)}】
+    </div>
+  `;
+
+  const equipBtn = document.createElement("button");
+  equipBtn.textContent = "装備";
+
+  equipBtn.onclick = (e)=>{
+    e.stopPropagation();
+
+    emp.equippedTitle = {
+      type:"level",
+      level:lv
+    };
+
+    save();
+
+    renderTitles();
+    renderEmployee();
+    renderEmployeeRanking();
+    renderRanking();
+
+    showDQMessage(`Lv.${lv}称号を装備した！`);
+  };
+
+  row.appendChild(equipBtn);
+  container.appendChild(row);
+
+});
+
+  // ===== 称号表示 =====
+  if(emp.titles && emp.titles.length > 0){
+
+    emp.titles.forEach(id=>{
+
+      const master = TITLE_MASTER[id];
+      if(!master) return;
+
+      const row = document.createElement("div");
+      row.className = "item title-appear";
+      row.style.cursor = "pointer";
+
+      row.innerHTML =
+        `<div class="title-${master.rarity}">
+          🏅 ${master.name} 【${master.rarity}】
+        </div>`;
+
+const equipBtn = document.createElement("button");
+equipBtn.textContent = "装備";
+
+equipBtn.onclick = (e)=>{
+  e.stopPropagation();
+
+  const emp = state.employees[currentUser];
+
+  emp.equippedTitle = {
+    type:"title",
+    id:id
+  };
+
+  save();
+
+  renderTitles();
+  renderEmployee();
+  renderEmployeeRanking();  // ⭐追加
+  renderRanking();          // ⭐管理画面用
+
+  showDQMessage("称号を装備した！");
+};
+
+row.appendChild(equipBtn);
+
+      row.onclick = ()=>{
+        showDQMessage(master.description);
+      };
+
+      container.appendChild(row);
+    });
+
+  }else{
+    container.innerHTML += "<div>まだ称号を持っていない。</div>";
+  }
+
+  // ===== 開発者モード =====
+  if(state.devMode){
+
+    const devBox = document.createElement("div");
+    devBox.style.marginTop = "12px";
+    devBox.style.borderTop = "1px solid #666";
+    devBox.style.paddingTop = "8px";
+
+    devBox.innerHTML =
+      `<div style="color:#f66;">🛠 開発者モード</div>`;
+
+// 全称号開放
+    const btnAll = document.createElement("button");
+    btnAll.textContent = "全称号解放";
+    btnAll.onclick = ()=>{
+      Object.keys(TITLE_MASTER).forEach(id=>{
+        giveTitle(currentUser, id);
+      });
+    };
+
+// 経験値追加
+    const btnLv = document.createElement("button");
+    btnLv.textContent = "レベル+500XP";
+    btnLv.onclick = ()=>{
+      const emp = state.employees[currentUser];
+      emp.totalEarned += 500;
+      save();
+      renderEmployee();
+    };
+
+// 連続称号
+const btnStreak = document.createElement("button");
+btnStreak.textContent = "連続30";
+btnStreak.onclick = ()=>{
+  const emp = state.employees[currentUser];
+  emp.streak = 30;
+  checkStreakTitles(emp.streak);
+  save();
+  renderTitles();
+};
+
+// 夜勤テスト
+const btnNight = document.createElement("button");
+btnNight.textContent = "夜勤50";
+btnNight.onclick = ()=>{
+  const emp = state.employees[currentUser];
+  emp.nightCount = 50;
+  checkNightTitles(emp.nightCount);
+  save();
+  renderTitles();
+};
+
+// パーフェクト回数
+const btnPerfect = document.createElement("button");
+btnPerfect.textContent = "完全制覇30";
+btnPerfect.onclick = ()=>{
+  const emp = state.employees[currentUser];
+  emp.perfectCount = 30;
+  checkPerfectTitles(emp.perfectCount);
+  save();
+  renderTitles();
+};
+
+devBox.appendChild(btnAll);
+devBox.appendChild(btnLv);
+devBox.appendChild(btnStreak);
+devBox.appendChild(btnNight);
+devBox.appendChild(btnPerfect);
+
+container.appendChild(devBox);
+}
 }
 
 function getLevelInfo(total){
@@ -1517,7 +2345,237 @@ function getLevelInfo(total){
     }
   }
 
-  return { level: level };
+  return {
+    level: level,
+    title: getTitle(level)
+  };
+}
+
+function getRequiredExp(level){
+  return level * level * 10;
+}
+
+
+function showLevelUpPopup(level){
+
+  playLevelUpSound();
+
+  showDQMessage(`レベルが あがった！\nLv.${level} に なった！`);
+}
+function playLevelUpSound(){
+
+  const audio = new Audio("levelup.mp3");
+
+  audio.volume = 0.1;
+
+  audio.play().catch(err=>{
+    console.log("音再生エラー", err);
+  });
+}
+
+
+function giveTitle(code, titleId){
+
+  const emp = state.employees[code];
+  if(!emp) return;
+
+  if(!emp.titles.includes(titleId)){
+
+    emp.titles.push(titleId);
+    save();
+
+    const master = TITLE_MASTER[titleId];
+    if(!master) return;
+
+    // ⭐ レア度別演出
+    let duration = 3000;
+    let effect = "";
+
+    if(master.rarity === "SR"){
+      duration = 4000;
+      effect = "✨ ";
+    }
+
+    if(master.rarity === "SSR"){
+      duration = 5000;
+      effect = "🌟🌟 ";
+    }
+
+    if(master.rarity === "UR"){
+      duration = 6000;
+      effect = "👑✨ ";
+      playLevelUpSound(); // 特別音
+    }
+
+    showDQMessage(
+      `${effect}🏅 ${master.name} 【${master.rarity}】 を てにいれた！`,
+      duration
+    );
+
+    if(code === currentUser){
+      renderTitles();
+    }
+
+    checkMasterTitle(code);
+  }
+}
+
+function toggleQuest(id){
+
+  if(!isShiftDay()){
+    playMiss();
+    showDQMessage("しかし こうげきは あたらなかった！");
+    return;
+  }
+
+  const rec = state.today.progress[currentUser];
+  if(rec.checked[id]) return;
+
+  const q = state.quests.find(x=>x.id===id);
+  if(!q) return;
+
+  const emp = state.employees[currentUser];
+
+  const oldLevel = getLevelInfo(emp.totalEarned || 0).level;
+
+  // 🗡 攻撃音
+  playAttack();
+
+  // 攻撃後 0.5秒待つ
+  setTimeout(()=>{
+
+    // クエスト達成処理
+    rec.checked[id] = true;
+    rec.todayPoints += q.points;
+
+    emp.totalPoints += q.points;
+    emp.totalEarned += q.points;
+
+    const newLevel = getLevelInfo(emp.totalEarned).level;
+
+    save();
+    renderEmployee();
+
+    showDQMessage(`${q.title} を たおした！\n${q.points}ポイント えた！`);
+
+  const allDone = state.quests.every(q => rec.checked[q.id]);
+
+if(allDone){
+
+  giveTitle(currentUser, "perfect1");
+
+  const emp = state.employees[currentUser];
+
+emp.perfectCount += 1;
+checkPerfectTitles(emp.perfectCount);
+
+  const today = todayStr();
+  const yesterday = getYesterdayStr();
+
+  if(emp.lastClearDate === yesterday){
+    emp.streak += 1;
+  }else{
+    emp.streak = 1;
+  }
+
+  emp.lastClearDate = today;
+
+const now = new Date();
+const hour = now.getHours();
+
+if(hour < 7){
+  emp.nightCount += 1;
+  checkNightTitles(emp.nightCount);
+}
+
+  save();
+
+  checkStreakTitles(emp.streak);
+}
+
+    if(allDone){
+
+      // 💥 戦闘終了音も少し間をあける
+      setTimeout(()=>{
+        playBattleEnd();
+
+        // 勝利音後さらに間
+        setTimeout(()=>{
+
+          if(newLevel > oldLevel){
+            showLevelUpPopup(newLevel);
+          }
+        },1000);
+
+      },500);
+
+    }else{
+
+      if(newLevel > oldLevel){
+        setTimeout(()=>{
+          showLevelUpPopup(newLevel);
+        },700);
+      }
+
+    }
+
+  },500);
+}
+
+function showSimpleNotice(text){
+
+  const notice = document.createElement("div");
+  notice.textContent = text;
+
+  notice.style.position="fixed";
+  notice.style.bottom="40px";
+  notice.style.left="50%";
+  notice.style.transform="translateX(-50%)";
+  notice.style.background="#111";
+  notice.style.color="#fff";
+  notice.style.padding="12px 20px";
+  notice.style.borderRadius="12px";
+  notice.style.zIndex="9999";
+
+  document.body.appendChild(notice);
+
+  setTimeout(()=>{
+    notice.remove();
+  },2000);
+}
+
+function showDQMessage(text, duration = 3000){
+
+  const old = document.getElementById("dqMessage");
+  if(old) old.remove();
+
+  const box = document.createElement("div");
+  box.id="dqMessage";
+
+  box.innerHTML = text.replace(/\n/g,"<br>");
+
+  document.body.appendChild(box);
+
+  setTimeout(()=>{
+    box.remove();
+  }, duration);
+}
+
+function showEmpTab(id){
+playCursor();
+
+  const tabs = ["empQuest","empShop","empRanking","empTitles"];
+
+  tabs.forEach(t=>{
+    const el = document.getElementById(t);
+    if(el) el.classList.add("hidden");
+  });
+
+  document.getElementById(id).classList.remove("hidden");
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js?v=" + APP_VERSION);
 }
 
 function getNextLevelRequirement(total){
@@ -1528,250 +2586,381 @@ function getNextLevelRequirement(total){
 
   return getRequiredExp(info.level + 1);
 }
+function getTitle(level){
 
-function chooseBranch(index){
+  if(level >= 90) return "伝説の勇者";
+  if(level >= 70) return "勇者";
+  if(level >= 50) return "見習い勇者";
+  if(level >= 30) return "勇者の卵";
+  if(level >= 10) return "期待の冒険者";
 
-/* ルート効果 */
+  return "見習い冒険者";
+}
+function confirmFullReset(){
 
-if(currentBranch && currentBranch.routeType){
+  // 管理者コード再入力
+  const input = prompt("かんりしゃコードを いれてください");
 
-const type = currentBranch.routeType[index];
+  if(input !== ADMIN_CODE){
+    showDQMessage("じゅもんが ちがいます");
+    return;
+  }
 
-if(type==="safe"){
-showMessage("🛡 安全ルートを進む！");
+  // 1回目確認
+  if(!confirm("ほんとうに すべてのデータを けしますか？")){
+    return;
+  }
+
+  // 2回目確認
+  if(!confirm("さいごの かくにんです。\nぜんぶ きえてしまいます！")){
+    return;
+  }
+
+  // データ削除
+  localStorage.removeItem(STORAGE_KEY);
+
+  state = {
+    employees:{},
+    quests:[],
+    rewards:[],
+    today:{date:todayStr(),progress:{}},
+    shiftTable:{},
+    shiftOverrides:{},
+    exchangeHistory:[]
+  };
+
+  showDQMessage("すべての データが きえた…");
+
+  setTimeout(()=>{
+    location.reload();
+  },1500);
 }
 
-if(type==="danger"){
-showMessage("⚔ 危険な気配がする…");
+let backupDone = false;
+
+setInterval(() => {
+
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+
+  if(hour === 7 && minute < 2 && !backupDone){
+
+    backupDone = true; // ← 二重防止
+
+    autoBackup();
+
+    showDQMessage("あたらしいあさがはじまった！");
+
+    setTimeout(()=>{
+      location.reload();
+    },2000);
+  }
+
+  // 7:02以降でリセット
+  if(hour !== 7){
+    backupDone = false;
+  }
+
+}, 60000);
+
+function checkStreakTitles(streak){
+
+  if(streak >= 30){
+    giveTitle(currentUser, "streak30");
+  }
+  else if(streak >= 7){
+    giveTitle(currentUser, "streak7");
+  }
+  else if(streak >= 3){
+    giveTitle(currentUser, "streak3");
+  }
 }
+function checkNightTitles(count){
 
-if(type==="treasure"){
-showMessage("🎁 宝の匂いがする！");
+  if(count >= 50){
+    giveTitle(currentUser, "night50");
+  }
+  else if(count >= 20){
+    giveTitle(currentUser, "night20");
+  }
+  else if(count >= 5){
+    giveTitle(currentUser, "night5");
+  }
 }
+function checkPerfectTitles(count){
 
+  if(count >= 30){
+    giveTitle(currentUser, "perfect30");
+  }
+  else if(count >= 10){
+    giveTitle(currentUser, "perfect10");
+  }
+  else if(count >= 5){
+    giveTitle(currentUser, "perfect5");
+  }
 }
-  if(!currentBranch) return;
+function checkMasterTitle(code){
 
-  const nextPos = currentBranch.next[index];
+  const emp = state.employees[code];
+  if(!emp) return;
 
-  state.sugoroku.position = nextPos;
+  const owned = emp.titles || [];
 
-  document.getElementById("branchUI").style.display = "none";
+  // 全称号ID取得
+  const allTitles = Object.keys(TITLE_MASTER)
+    .filter(id => id !== "secret_master");
 
-const mapLayer = document.getElementById("mapLayer");
-mapLayer.classList.remove("zoomFocus");
+  // 全部持っているか判定
+  const hasAll = allTitles.every(id => owned.includes(id));
 
-  currentBranch = null;
-
-  render();
-
- const tile = state.sugoroku.tiles[state.sugoroku.position];
-
-if(tile?.type === "branch"){
-  handleEvent("branch");
-  return;
-}
-
-const tileType =
-  state.sugoroku.tiles[state.sugoroku.position]?.type;
-
-setTimeout(()=>{
-  handleEvent(tileType);
-},600);
-
-  save();
-}
-
-function changeAvatar(icon){
-
-  state.player.avatar = icon;
-
-  save();
-  render();
-
-}
-
-function drawMiniMap(){
-
-const canvas = document.getElementById("miniMap");
-if(!canvas) return;
-
-const ctx = canvas.getContext("2d");
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-const tiles = state.sugoroku.tiles;
-if(!tiles || tiles.length===0) return;
-
-const p = tiles[state.sugoroku.position];
-if(!p) return;
-
-/* 最大座標取得 */
-
-let maxX = 0;
-let maxY = 0;
-
-tiles.forEach(t=>{
-if(t.x > maxX) maxX = t.x;
-if(t.y > maxY) maxY = t.y;
-});
-
-/* スケール自動調整 */
-
-const scaleX = canvas.width / (maxX + 2);
-const scaleY = canvas.height / (maxY + 2);
-
-const scale = Math.min(scaleX, scaleY);
-
-ctx.strokeStyle="white";
-ctx.lineWidth=2;
-
-/* ルート描画 */
-
-tiles.forEach(tile=>{
-
-if(!tile.next) return;
-
-tile.next.forEach(nextIndex=>{
-
-const nextTile = tiles[nextIndex];
-if(!nextTile) return;
-
-ctx.beginPath();
-ctx.moveTo(tile.x*scale, tile.y*scale);
-ctx.lineTo(nextTile.x*scale, nextTile.y*scale);
-ctx.stroke();
-
-});
-
-});
-
-/* プレイヤー */
-
-ctx.fillStyle="red";
-ctx.beginPath();
-ctx.arc(p.x*scale, p.y*scale, 4, 0, Math.PI*2);
-ctx.fill();
-
-}
-
-
-function toggleFullMap(){
-
-fullMap = !fullMap;
-
-const mapView = document.querySelector(".map");
-const mapLayer = document.getElementById("mapLayer");
-
-if(fullMap){
-
-/* 全体マップ */
-
-mapView.classList.add("full");
-
-/* カメラ解除 */
-
-mapLayer.style.transform = "translate(0px,0px)";
-
-}else{
-
-/* 通常モード */
-
-mapView.classList.remove("full");
-
-/* renderでカメラ再計算 */
-
-render();
-
-}
-
-}
-
-function drawTrees(){
-
-const mapLayer = document.getElementById("mapLayer");
-
-document.querySelectorAll(".tree").forEach(t=>t.remove());
-
-for(let i=0;i<40;i++){
-
-const tree=document.createElement("div");
-
-tree.className="tree";
-tree.textContent="🌳";
-
-tree.style.position="absolute";
-tree.style.left=Math.random()*4800+"px";
-tree.style.top=Math.random()*2800+"px";
-tree.style.opacity="0.35";
-
-mapLayer.appendChild(tree);
-
-}
-
-}
-
- // バージョン
-const version = localStorage.getItem("appVersion");
-
-const versionBox = document.getElementById("versionDisplay");
-
-if(versionBox){
-  if(version){
-    versionBox.textContent = "v" + version;
-  }else{
-    versionBox.textContent = "v?";
+  if(hasAll){
+    giveTitle(code, "secret_master");
   }
 }
 
+function importEmployeesOnly(file){
 
-/* ===== safety patch ===== */
-
-function updateVisibility(){
-  const tiles=document.querySelectorAll(".tile");
-  tiles.forEach(t=>{ t.style.visibility="visible"; });
-}
-
-function drawTrees(){
-  const mapLayer=document.getElementById("mapLayer");
-  if(!mapLayer) return;
-  document.querySelectorAll(".tree").forEach(t=>t.remove());
-  for(let i=0;i<30;i++){
-    const tree=document.createElement("div");
-    tree.className="tree";
-    tree.textContent="🌳";
-    tree.style.position="absolute";
-    tree.style.left=Math.random()*4800+"px";
-    tree.style.top=Math.random()*2800+"px";
-    tree.style.opacity="0.35";
-    mapLayer.appendChild(tree);
+  if(!file){
+    alert("ファイルを選択してください");
+    return;
   }
-}
 
-function initDevTools(){
-  const box=document.getElementById("devTools");
-  if(!box) return;
-  try{
-    const data=JSON.parse(localStorage.getItem("shukkinQuestData_v3"))||{};
-    if(data.devMode){
-      box.style.display="block";
-    }else{
-      box.style.display="none";
+  const reader = new FileReader();
+
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+
+      let employeesArray = null;
+
+      // 🔥 両対応
+      if(Array.isArray(data)){
+        employeesArray = data;
+      }else if(Array.isArray(data.employees)){
+        employeesArray = data.employees;
+      }else{
+        alert("従業員データ形式ではありません");
+        return;
+      }
+
+      if(!confirm("従業員データをすべて置き換えます。よろしいですか？")){
+        return;
+      }
+
+      state.employees = {};
+      state.today.progress = {};
+
+      employeesArray.forEach(emp=>{
+
+        const code = String(emp.id);
+
+        state.employees[code] = {
+          name: emp.name,
+          shiftName: emp.shiftName,
+          totalPoints: 0,
+          totalEarned: 0,
+          streak: 0,
+          lastClearDate: null,
+          nightCount: 0,
+          perfectCount: 0,
+          firstLoginDone: false,
+          titles: [],
+          equippedTitle:{
+            type:"level",
+            level:1
+          }
+        };
+      });
+
+      save();
+      renderAdmin();
+      alert("従業員データ読み込み成功");
+
+    }catch(e){
+      alert("読み込み失敗");
     }
-  }catch(e){
-    box.style.display="none";
-  }
+  };
+
+  reader.readAsText(file);
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
-  initDevTools();
+function openEmployeeImport(){
+  const input = document.getElementById("employeeImportFile");
+  if(!input){
+    alert("file input が見つかりません");
+    return;
+  }
+  input.click();
+}
+
+function autoBackup(){
+
+  const today = todayStr();
+  const filename = `backup_${today}.json`;
+
+  const blob = new Blob(
+    [JSON.stringify(state,null,2)],
+    {type:"application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  console.log("自動バックアップ完了:", filename);
+}
+
+let modalConfig = null;
+
+function openModal(config){
+
+  modalConfig = config;
+
+  document.getElementById("modalTitle").textContent =
+    config.title;
+
+  const body = document.getElementById("modalBody");
+  body.innerHTML = "";
+
+  config.fields.forEach(field=>{
+
+    const wrapper = document.createElement("div");
+    wrapper.style.marginBottom="10px";
+
+    wrapper.innerHTML = `
+      <div style="font-size:13px;margin-bottom:4px;">
+        ${field.label}
+      </div>
+      <input type="text"
+             id="modal_${field.key}"
+             value="${field.value}"
+             style="width:100%;padding:6px;border-radius:6px;">
+    `;
+
+    body.appendChild(wrapper);
+  });
+
+  document.getElementById("editModal")
+    .classList.remove("hidden");
+}
+
+function closeModal(){
+  document.getElementById("editModal")
+    .classList.add("hidden");
+  modalConfig = null;
+}
+
+function saveModal(){
+
+  if(!modalConfig) return;
+
+  const data = {};
+
+  modalConfig.fields.forEach(field=>{
+    data[field.key] =
+      document.getElementById("modal_"+field.key).value;
+  });
+
+  modalConfig.onSave(data);
+
+  closeModal();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const v = document.getElementById("versionDisplay");
+  if(v){
+    v.textContent = "v" + APP_VERSION;
+  }
 });
 
-window.onerror=function(msg,url,line){
- console.log("JS ERROR:",msg,"line:",line);
-};
-/* ===== end safety patch ===== */
+function renderVersionInfo(){
+
+  const current = document.getElementById("currentVersion");
+  const list = document.getElementById("versionHistoryList");
+
+  if(!current || !list) return;
+
+  current.innerHTML = `
+    <strong>現在のバージョン：</strong> v${APP_VERSION}
+  `;
+
+  list.innerHTML = "";
+
+  VERSION_HISTORY.forEach(v=>{
+
+    const box = document.createElement("div");
+    box.className = "card";
+
+    box.innerHTML = `
+      <strong>v${v.version}</strong>（${v.date}）
+    `;
+
+    v.content.forEach(c=>{
+      const item = document.createElement("div");
+      item.style.fontSize="13px";
+      item.textContent = "・" + c;
+      box.appendChild(item);
+    });
+
+    list.appendChild(box);
+  });
+}
+
+function checkSugorokuTitles(code){
+
+  const emp = state.employees[code];
+  if(!emp) return;
+
+  const laps = emp.sugorokuLaps || 0;
+
+  if(laps >= 5){
+    giveTitle(code, "sugoroku5");
+  }
+
+  if(laps >= 20){
+    giveTitle(code, "sugoroku20");
+  }
+
+  if(laps >= 50){
+    giveTitle(code, "sugoroku50");
+  }
+
+  if(laps >= 100){
+    giveTitle(code, "sugoroku100");
+  }
+}
 
 </script>
+
+<input id="employeeImportFile"
+       type="file"
+       accept="application/json"
+       style="position:fixed; top:-1000px;"
+       onchange="importEmployeesOnly(this.files[0])">
+
+<div id="editModal" class="modal hidden">
+  <div class="modalBox">
+
+    <div class="modalHeader">
+      <h3 id="modalTitle"></h3>
+      <button class="closeBtn" onclick="closeModal()">✕</button>
+    </div>
+
+    <div id="modalBody"></div>
+
+    <div class="modalActions">
+      <button class="primary" onclick="saveModal()">保存</button>
+      <button class="ghost" onclick="closeModal()">取消</button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
