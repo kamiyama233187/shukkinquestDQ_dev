@@ -627,6 +627,12 @@ clearInterval(moveInterval);
 return;
 }
 
+if(currentTile.type === "goal"){
+clearInterval(moveInterval);
+player.classList.remove("walk");
+return;
+}
+
 // 分岐マスで止まる
 if(currentTile.type === "branch"){
 
@@ -641,15 +647,15 @@ return;
 // 次のマス
 let nextPos;
 
-if(currentTile.next && currentTile.next.length>0){
+if(!currentTile.next || currentTile.next.length === 0){
 
-nextPos = currentTile.next[0];
-
-}else{
-
-nextPos = state.sugoroku.position+1;
+clearInterval(moveInterval);
+player.classList.remove("walk");
+return;
 
 }
+
+nextPos = currentTile.next[0];
 
 // マップ終端安全処理
 if(nextPos >= state.sugoroku.tiles.length){
@@ -740,6 +746,11 @@ tile.dataset.index=i;
 if(i===state.sugoroku.position) tile.classList.add("active");
 if(i===tiles.length-1) tile.classList.add("goal");
 
+case "plus":
+tile.textContent="+";
+tile.classList.add("plus");
+break;
+
 switch(tileData.type){
 case "minus":
 tile.textContent="-";
@@ -764,6 +775,11 @@ break;
 case "cave":
 tile.innerHTML="<img src='cave.png' width='30'>";
 tile.classList.add("cave");
+break;
+
+case "exit":
+tile.textContent="🚪";
+tile.classList.add("exit");
 break;
 
 case "branch":
@@ -898,15 +914,22 @@ state.sugoroku.tiles = [];
 path.forEach((pos,i)=>{
 
 let type = "none";
+let next = [i+1];
 
-if(i===0) type="start";
-else if(i===path.length-1) type="goal";
+if(i===0){
+type="start";
+}
+
+if(i===path.length-1){
+type="goal";
+next=[];
+}
 
 state.sugoroku.tiles.push({
 x:pos[0],
 y:pos[1],
 type:type,
-next:[i+1]
+next:next
 });
 
 });
@@ -952,7 +975,7 @@ state.sugoroku.tiles.push({
 x:bx,
 y:by,
 type:"none",
-next:[pos+4]
+next:[Math.min(pos+4, path.length-1)]
 });
 
 /* 2ルート */
