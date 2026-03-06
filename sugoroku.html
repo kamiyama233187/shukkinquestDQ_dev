@@ -752,6 +752,12 @@ tile.classList.add("plus");
 break;
 
 switch(tileData.type){
+
+case "plus":
+tile.textContent="+";
+tile.classList.add("plus");
+break;
+
 case "minus":
 tile.textContent="-";
 tile.classList.add("minus");
@@ -779,15 +785,7 @@ break;
 
 case "exit":
 tile.textContent="🚪";
-tile.classList.add("exit");
-break;
-
-case "branch":
-tile.textContent="↔";
-tile.classList.add("branch");
-break;
-default: tile.textContent="";
-}
+tile.classList.add("
 
 tile.style.left = tileData.x*70+"px";
 tile.style.top = tileData.y*70+"px";
