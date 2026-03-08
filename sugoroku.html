@@ -666,20 +666,6 @@ if(state.sugoroku.hp === undefined){
   state.sugoroku.maxHp = 100;
 }
 
-let walkFrame = 0;
-
-function updateWalkFrame(){
-
-walkFrame++;
-
-if(walkFrame > 2){
-walkFrame = 0;
-}
-
-renderPlayer();
-
-}
-
 function save(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -842,6 +828,18 @@ save();
 }
 
 },200);
+
+}
+
+function updateWalkFrame(){
+
+walkFrame++;
+
+if(walkFrame > 2){
+walkFrame = 0;
+}
+
+renderPlayer();
 
 }
 

@@ -2,46 +2,78 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>キャラクター</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>キャラカスタム</title>
 
 <style>
 
 body{
 background:black;
 color:white;
-font-family:"MS Gothic";
+font-family:monospace;
 text-align:center;
 }
 
+/* プレビュー */
+
 .preview{
-width:96px;
-height:96px;
+width:192px;
+height:192px;
 margin:auto;
 position:relative;
+border:2px solid white;
+margin-top:20px;
 }
 
 .preview img{
 position:absolute;
 left:0;
 top:0;
-width:96px;
-height:96px;
-object-fit:none;
+width:192px;
+height:192px;
 image-rendering:pixelated;
 }
 
-select{
+/* パーツ一覧 */
+
+.parts{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:6px;
+max-height:200px;
+overflow:auto;
+border:2px solid white;
+padding:10px;
 margin:10px;
-font-size:16px;
 }
 
+.parts img{
+width:48px;
+height:48px;
+image-rendering:pixelated;
+cursor:pointer;
+border:1px solid #444;
+}
+
+.parts img:hover{
+border:1px solid white;
+}
+
+/* ボタン */
+
 button{
-margin-top:15px;
-padding:10px 20px;
-font-size:16px;
 background:black;
 color:white;
 border:2px solid white;
+padding:8px 15px;
+margin:6px;
+font-size:16px;
+}
+
+button:active{
+background:white;
+color:black;
 }
 
 </style>
@@ -61,18 +93,18 @@ border:2px solid white;
 
 <br>
 
-髪型
-<select id="hairSelect"></select>
-
-<br>
-
-服
-<select id="clothesSelect"></select>
-
-<br>
-
+<button onclick="randomChar()">🎲 ランダム</button>
 <button onclick="saveChar()">保存</button>
 <button onclick="location.href='sugoroku.html'">戻る</button>
+
+<h3>体</h3>
+<div id="bodyList" class="parts"></div>
+
+<h3>髪型</h3>
+<div id="hairList" class="parts"></div>
+
+<h3>服</h3>
+<div id="clothesList" class="parts"></div>
 
 <script>
 
@@ -88,65 +120,81 @@ armor:0
 };
 }
 
-/* 選択肢 */
+/* 数 */
 
-const hairList = [0,1,2,3,4];
-const clothesList = [0,1,2,3];
+const bodyCount = 52;
+const hairCount = 416;
+const clothesCount = 562;
 
-const hairSelect = document.getElementById("hairSelect");
-const clothesSelect = document.getElementById("clothesSelect");
+/* リスト */
 
-/* 髪型 */
+const bodyList=document.getElementById("bodyList");
+const hairList=document.getElementById("hairList");
+const clothesList=document.getElementById("clothesList");
 
-hairList.forEach(i=>{
+/* body */
 
-const op=document.createElement("option");
+for(let i=0;i<bodyCount;i++){
 
-op.value=i;
-op.text="Hair "+i;
+const img=document.createElement("img");
 
-hairSelect.appendChild(op);
+img.src="assets/body/body"+i+".png";
 
-});
+img.onclick=()=>{
 
-/* 服 */
+state.player.body=i;
 
-clothesList.forEach(i=>{
-
-const op=document.createElement("option");
-
-op.value=i;
-op.text="Clothes "+i;
-
-clothesSelect.appendChild(op);
-
-});
-
-/* 初期値 */
-
-hairSelect.value = state.player.hair;
-clothesSelect.value = state.player.armor;
-
-hairSelect.onchange = ()=>{
-state.player.hair = hairSelect.value;
 render();
+
 };
 
-clothesSelect.onchange = ()=>{
-state.player.armor = clothesSelect.value;
+bodyList.appendChild(img);
+
+}
+
+/* hair */
+
+for(let i=0;i<hairCount;i++){
+
+const img=document.createElement("img");
+
+img.src="assets/hair/hair"+i+".png";
+
+img.onclick=()=>{
+
+state.player.hair=i;
+
 render();
+
 };
+
+hairList.appendChild(img);
+
+}
+
+/* clothes */
+
+for(let i=0;i<clothesCount;i++){
+
+const img=document.createElement("img");
+
+img.src="assets/clothes/clothes"+i+".png";
+
+img.onclick=()=>{
+
+state.player.armor=i;
+
+render();
+
+};
+
+clothesList.appendChild(img);
+
+}
 
 /* 描画 */
 
 function render(){
-
-const frameX = 0;
-const frameY = 0;
-
-const body = document.getElementById("body");
-const hair = document.getElementById("hair");
-const clothes = document.getElementById("clothes");
 
 document.getElementById("body").src =
 "assets/body/body"+state.player.body+".png";
@@ -157,14 +205,22 @@ document.getElementById("hair").src =
 document.getElementById("clothes").src =
 "assets/clothes/clothes"+state.player.armor+".png";
 
-body.style.objectPosition =
-"-"+frameX+"px -"+frameY+"px";
+}
 
-hair.style.objectPosition =
-"-"+frameX+"px -"+frameY+"px";
+/* ランダム */
 
-clothes.style.objectPosition =
-"-"+frameX+"px -"+frameY+"px";
+function randomChar(){
+
+state.player.body =
+Math.floor(Math.random()*bodyCount);
+
+state.player.hair =
+Math.floor(Math.random()*hairCount);
+
+state.player.armor =
+Math.floor(Math.random()*clothesCount);
+
+render();
 
 }
 
