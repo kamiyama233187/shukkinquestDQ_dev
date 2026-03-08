@@ -1908,14 +1908,12 @@ const body = document.getElementById("playerBody");
 const hair = document.getElementById("playerHair");
 const clothes = document.getElementById("playerClothes");
 
-body.src = "assets/body/body" + state.player.body + ".png";
+body.src = "assets/body/body"+state.player.body+".png";
+hair.src = "assets/hair/hair"+state.player.hair+".png";
+clothes.src = "assets/clothes/clothes"+state.player.armor+".png";
 
-hair.src = "assets/hair/hair" + state.player.hair + ".png";
-
-clothes.src = "assets/clothes/clothes" + state.player.armor + ".png";
-
-const frameX = walkFrame * 48;
-const frameY = direction * 48;
+const frameX = walkFrame * 64;
+const frameY = direction * 64;
 
 body.style.objectPosition =
 "-"+frameX+"px -"+frameY+"px";
