@@ -192,6 +192,38 @@ background:#0a1f0a;
   background-size:40px 40px;
 }
 
+/* ステージ背景 */
+
+.stage1{
+background:#0a1f0a;
+background-image:radial-gradient(#1f3d1f 2px, transparent 2px);
+background-size:40px 40px;
+}
+
+.stage2{
+background:#3b2f0a;
+background-image:radial-gradient(#8b6f2a 2px, transparent 2px);
+background-size:40px 40px;
+}
+
+.stage3{
+background:#0a1a2f;
+background-image:radial-gradient(#3a6ea5 2px, transparent 2px);
+background-size:40px 40px;
+}
+
+.stage4{
+background:#2a0a0a;
+background-image:radial-gradient(#8b1a1a 2px, transparent 2px);
+background-size:40px 40px;
+}
+
+.stage5{
+background:#1a1a1a;
+background-image:radial-gradient(#666 2px, transparent 2px);
+background-size:40px 40px;
+}
+
 .map.full{
   overflow:auto;
   touch-action: pan-x pan-y;
@@ -584,30 +616,35 @@ function rollDice(){
     return;
   }
 
-  // ① 振った表示（即消える）
- const box = document.getElementById("dqMessage");
-
-box.innerHTML = "🎲";
-box.style.display = "block";
-box.classList.add("diceRoll");
-
-  const roll = Math.floor(Math.random()*6)+1;
-
-  // ② 少し待って結果表示
- setTimeout(()=>{
-
   const box = document.getElementById("dqMessage");
 
-  box.classList.remove("diceRoll");
+  box.style.display = "block";
 
-  box.innerHTML = "🎲 " + roll + "！";
+  let roll = 1;
+  let count = 0;
 
-    // ③ 結果メッセージが終わったら移動
-    setTimeout(()=>{
-      startMove(roll, emp, today);
-    }, 800);  // ←ここが“間”
+  const diceInterval = setInterval(()=>{
 
-  }, 300);
+    roll = Math.floor(Math.random()*6)+1;
+
+    box.innerHTML = "🎲 " + roll;
+
+    count++;
+
+    if(count > 10){
+
+      clearInterval(diceInterval);
+
+      box.innerHTML = "🎲 " + roll + "！";
+
+      setTimeout(()=>{
+        startMove(roll, emp, today);
+      },600);
+
+    }
+
+  },80);
+
 }
 
 function startMove(roll, emp, today){
@@ -694,6 +731,15 @@ save();
 }
 
 function render(){
+  
+// ステージ背景変更
+const mapView = document.querySelector(".map");
+
+mapView.classList.remove(
+"stage1","stage2","stage3","stage4","stage5"
+);
+
+mapView.classList.add("stage"+state.sugoroku.stage);
 
 document.getElementById("stageNum").textContent = state.sugoroku.stage;
 document.getElementById("pos").textContent = state.sugoroku.position;
@@ -903,6 +949,7 @@ setTimeout(render,500);
 =================== */
 
 drawMiniMap();
+}
 
 function generateTrees(){
 
