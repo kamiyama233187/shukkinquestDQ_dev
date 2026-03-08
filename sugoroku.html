@@ -1386,8 +1386,11 @@ if(type === "exit"){
 
   state.sugoroku.inCave = false;
 
+  const returnPos = state.sugoroku.caveReturnPos ?? 0;
+
   generateMap();
-state.sugoroku.position = state.sugoroku.caveReturnPos;
+
+  state.sugoroku.position = returnPos;
 
   save();
   render();
