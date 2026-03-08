@@ -553,7 +553,7 @@ const STAGE_PATH = {
 [12,5],[13,5],[14,5],[15,5],
 [16,5],[17,5],[18,5]
 ]
-
+};
 const STAGE_TILE_RATE = {
   1: {
     plus:0.20,
@@ -1580,7 +1580,7 @@ function devTrigger(type){
   if(!emp) return;
 
   if(type === "goal"){
-    state.sugoroku.position = 29;
+    state.sugoroku.position = state.sugoroku.tiles.length - 1;
     render();
     showMessage("🏁 強制ゴール！");
     return;
