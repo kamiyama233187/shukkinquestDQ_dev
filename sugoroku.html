@@ -445,7 +445,8 @@ if(currentUser && !state.employees[currentUser]){
 }
 
 let currentBranch = null;
-let currentRouteEffect = null;
+let currentRouteEffect = null
+const devMode = false;
 if(!state.player){
   state.player = {
     avatar:"🧍",
