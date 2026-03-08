@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>キャラカスタム</title>
+<title>キャラクターカスタム</title>
 
 <style>
 
@@ -17,8 +17,8 @@ text-align:center;
 /* プレビュー */
 
 .preview{
-width:192px;
-height:192px;
+width:128px;
+height:128px;
 margin:auto;
 position:relative;
 overflow:hidden;
@@ -35,19 +35,37 @@ height:256px;
 
 image-rendering:pixelated;
 
-/* 正面(4行目) */
-transform:scale(3) translateY(-192px);
+/* 正面中央フレーム */
+transform:scale(2) translate(-64px,-192px);
 transform-origin:top left;
+}
+
+/* タブ */
+
+.tabs{
+display:flex;
+justify-content:center;
+gap:8px;
+margin:10px;
+flex-wrap:wrap;
+}
+
+.tabs button{
+background:black;
+color:white;
+border:2px solid white;
+padding:6px 10px;
+font-size:14px;
 }
 
 /* パーツ一覧 */
 
 .parts{
-display:flex;
+display:none;
 flex-wrap:wrap;
 justify-content:center;
 gap:6px;
-max-height:200px;
+max-height:260px;
 overflow:auto;
 border:2px solid white;
 padding:10px;
@@ -60,12 +78,14 @@ width:64px;
 height:64px;
 
 object-fit:none;
+
 image-rendering:pixelated;
 
 /* 正面フレーム */
 object-position:-64px -192px;
 
 cursor:pointer;
+
 border:1px solid #444;
 
 }
@@ -112,14 +132,18 @@ color:black;
 <button onclick="saveChar()">保存</button>
 <button onclick="location.href='sugoroku.html'">戻る</button>
 
-<h3>体</h3>
-<div id="bodyList" class="parts"></div>
+<div class="tabs">
 
-<h3>髪型</h3>
-<div id="hairList" class="parts"></div>
-<h3>ボトムス</h3>
+<button onclick="showTab('body')">体</button>
+<button onclick="showTab('legs')">ズボン</button>
+<button onclick="showTab('hair')">髪</button>
+<button onclick="showTab('clothes')">服</button>
+
+</div>
+
+<div id="bodyList" class="parts"></div>
 <div id="legsList" class="parts"></div>
-<h3>服</h3>
+<div id="hairList" class="parts"></div>
 <div id="clothesList" class="parts"></div>
 
 <script>
@@ -147,9 +171,9 @@ const legsCount = 142;
 /* リスト */
 
 const bodyList=document.getElementById("bodyList");
+const legsList=document.getElementById("legsList");
 const hairList=document.getElementById("hairList");
 const clothesList=document.getElementById("clothesList");
-const legsList=document.getElementById("legsList");
 
 /* body */
 
@@ -162,12 +186,30 @@ img.src="assets/body/body"+i+".png";
 img.onclick=()=>{
 
 state.player.body=i;
-
 render();
 
 };
 
 bodyList.appendChild(img);
+
+}
+
+/* legs */
+
+for(let i=0;i<legsCount;i++){
+
+const img=document.createElement("img");
+
+img.src="assets/legs/legs"+i+".png";
+
+img.onclick=()=>{
+
+state.player.legs=i;
+render();
+
+};
+
+legsList.appendChild(img);
 
 }
 
@@ -182,7 +224,6 @@ img.src="assets/hair/hair"+i+".png";
 img.onclick=()=>{
 
 state.player.hair=i;
-
 render();
 
 };
@@ -202,31 +243,11 @@ img.src="assets/clothes/clothes"+i+".png";
 img.onclick=()=>{
 
 state.player.armor=i;
-
 render();
 
 };
 
 clothesList.appendChild(img);
-
-}
-
-/* clothes */
-for(let i=0;i<legsCount;i++){
-
-const img=document.createElement("img");
-
-img.src="assets/legs/legs"+i+".png";
-
-img.onclick=()=>{
-
-state.player.legs=i;
-
-render();
-
-};
-
-legsList.appendChild(img);
 
 }
 
@@ -277,6 +298,22 @@ localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 alert("保存しました");
 
 }
+
+/* タブ */
+
+function showTab(name){
+
+document.querySelectorAll(".parts").forEach(el=>{
+el.style.display="none";
+});
+
+document.getElementById(name+"List").style.display="flex";
+
+}
+
+/* 初期表示 */
+
+showTab("body");
 
 render();
 
