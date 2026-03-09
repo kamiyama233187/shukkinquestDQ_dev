@@ -2060,28 +2060,26 @@ const arr = Object.entries(state.employees)
     }
 
     const row = document.createElement("div");
-    row.className="item";
-    const char = createRankCharacter(emp.player || {});
-row.appendChild(char);
-
-   const levelData = getLevelInfo(emp.totalEarned || 0);
+row.className="item";
 
 row.innerHTML = `
-  <div>
-    ${i+1}位 🏆 Lv.${levelData.level} ${e.name}
-    <div class="${rarityClass}" style="font-size:12px;">
-      【${titleText}】
-    </div>
-
-    <span class="badge">${e.pt}pt</span>
-<div style="font-size:12px;">
-  🎲 ${e.laps}周
+<div>
+${i+1}位 🏆 Lv.${levelData.level} ${e.name}
+<div class="${rarityClass}" style="font-size:12px;">
+【${titleText}】
 </div>
-  </div>
+<span class="badge">${e.pt}pt</span>
+<div style="font-size:12px;">
+🎲 ${e.laps}周
+</div>
+</div>
 `;
 
-    container.appendChild(row);
-  });
+const char = createRankCharacter(emp.player || {});
+row.prepend(char);   // ←ここ
+
+container.appendChild(row);
+});
 }
 
 function renderEmployeeRanking(){
@@ -2140,31 +2138,27 @@ const arr = Object.entries(state.employees)
     const levelData = getLevelInfo(emp.totalEarned || 0);
 
     const row = document.createElement("div");
-    row.className="item";
-    const char = createRankCharacter(emp.player || {});
-row.appendChild(char);
+row.className="item";
 
-    if(e.code === currentUser){
-      row.style.background = "#1e3a8a";
-    }
-
-    row.innerHTML = `
-      <div>
-        ${i+1}位 Lv.${levelData.level} ${e.name}
-        <div class="${rarityClass}" style="font-size:12px;">
-          【${titleText}】
-        </div>
-        <span class="badge">${e.pt}pt</span>
-<div style="font-size:12px;">
-  🎲 ${e.laps}周
+row.innerHTML = `
+<div>
+${i+1}位 Lv.${levelData.level} ${e.name}
+<div class="${rarityClass}" style="font-size:12px;">
+【${titleText}】
 </div>
-      </div>
-    `;
+<span class="badge">${e.pt}pt</span>
+<div style="font-size:12px;">
+🎲 ${e.laps}周
+</div>
+</div>
+`;
 
-    container.appendChild(row);
-  });
+const char = createRankCharacter(emp.player || {});
+row.prepend(char);
+
+container.appendChild(row);
+});
 }
-
 function renderTitles(){
 
   const container = document.getElementById("titleList");
