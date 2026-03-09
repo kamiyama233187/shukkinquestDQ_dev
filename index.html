@@ -13,23 +13,20 @@ width:48px;
 height:48px;
 position:relative;
 overflow:hidden;
-border:1px solid #444;
-margin-right:0px;
 }
 
 .rankChar img{
+position:absolute;
+left:0;
+top:0;
 
-width:64px;
-height:64px;
+width:192px;
+height:256px;
 
-object-fit:none;
-object-position:-64px -192px;
+transform:scale(0.25) translate(-64px,-192px);
+transform-origin:top left;
 
 image-rendering:pixelated;
-
-border:1px solid #444;
-overflow:hidden;
-
 }
 
 .hidden{
