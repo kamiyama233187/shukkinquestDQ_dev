@@ -9,11 +9,12 @@
 
 <style>
 .rankChar{
-width:64px;
-height:64px;
+width:48px;
+height:48px;
 position:relative;
-margin-right:6px;
-overflow:hidden;   /* ←追加 */
+overflow:hidden;
+border:1px solid #444;
+margin-right:10px;
 }
 
 .rankChar img{
@@ -26,9 +27,12 @@ height:256px;
 
 image-rendering:pixelated;
 
-transform:scale(0.5) translate(-64px,-192px);
+/* 正面 */
+transform:scale(0.5) translateY(-192px);
+
 transform-origin:top left;
 }
+
 .hidden{
   display:none !important;
 }
