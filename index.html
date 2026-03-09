@@ -473,6 +473,10 @@ input{
   </div>
 
   <!-- ===== クエストタブ ===== -->
+  <button onclick="takeFacingPhoto('testShelf')">
+前陳テスト撮影
+</button>
+  
   <div id="empQuest" class="card">
     <h3>今日のクエスト</h3>
     <div id="questList" class="list"></div>
@@ -869,6 +873,15 @@ sugoroku100:{
 };
 
 /* ================= STATE ================= */
+const FACING_SHELVES = [
+
+  {id:"s1", name:"米飯"},
+  {id:"s2", name:"パン"},
+  {id:"s3", name:"デザート"},
+  {id:"s4", name:"ヨーグルト"},
+  {id:"s5", name:"飲料"}
+
+];
 
 let state = {
   employees:{},
@@ -876,9 +889,15 @@ let state = {
   rewards:[],
   today:{date:todayStr(),progress:{}},
   shiftTable:{},
-  shiftOverrides:{},   // ← カンマ必要
+  shiftOverrides:{},
   exchangeHistory:[],
-history:{}
+  history:{},
+
+  /* ===== 前陳 ===== */
+  facing:{
+    shelves:[],     // 棚一覧
+    records:{}      // 撮影記録
+  }
 };
 
 let currentUser=null;
@@ -922,6 +941,24 @@ function playBattleEnd(){
   battleEndSound.play();
 }
 /* ================= UTIL ================= */
+
+function saveFacingRecord(shelfId, image){
+
+  const date = todayStr();
+
+  if(!state.facing.records[date]){
+    state.facing.records[date] = [];
+  }
+
+  state.facing.records[date].push({
+    shelf:shelfId,
+    employee:currentUser,
+    image:image,
+    time:new Date().toLocaleTimeString()
+  });
+
+  save();
+}
 
 function todayStr(){
 
@@ -967,6 +1004,12 @@ function load(){
   if(!state.shiftOverrides) state.shiftOverrides = {};
   if(!state.exchangeHistory) state.exchangeHistory = [];
   if(!state.history) state.history = {};
+  if(!state.facing){
+  state.facing = {
+    shelves:[],
+    records:{}
+  };
+}
 
   Object.values(state.employees).forEach(emp=>{
     if(emp.totalEarned === undefined){
@@ -3000,6 +3043,40 @@ return div;
 
 }
 
+async function takeFacingPhoto(shelfId){
+
+  try{
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"environment" }
+    });
+
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    await video.play();
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video,0,0);
+
+    const data = canvas.toDataURL("image/jpeg",0.8);
+
+    stream.getTracks().forEach(t=>t.stop());
+
+    saveFacingRecord(shelfId,data);
+
+    showDQMessage("前陳写真を保存した！");
+
+  }catch(e){
+
+    showDQMessage("カメラが使えない");
+
+  }
+
+}
 
 </script>
 
