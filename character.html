@@ -151,7 +151,7 @@ color:black;
 
 <script>
 
-const STORAGE_KEY = "shukkinQuestData_v3";
+const STORAGE_KEY = "shukkinCharacter";
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
@@ -361,9 +361,39 @@ render();
 
 function saveChar(){
 
-localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+const code = localStorage.getItem("currentUserCode");
+
+if(!code){
+alert("ログインしてください");
+return;
+}
+
+let data = JSON.parse(localStorage.getItem("shukkinQuestData_v3"));
+
+if(!data.employees[code]){
+alert("ユーザーが見つかりません");
+return;
+}
+
+data.employees[code].player = {
+body: state.player.body,
+legs: state.player.legs,
+armor: state.player.armor,
+hair: state.player.hair
+};
+
+localStorage.setItem("shukkinQuestData_v3", JSON.stringify(data));
 
 alert("保存しました");
+
+}
+
+const code = localStorage.getItem("currentUserCode");
+const data = JSON.parse(localStorage.getItem("shukkinQuestData_v3"));
+
+if(code && data?.employees?.[code]?.player){
+
+state.player = data.employees[code].player;
 
 }
 
