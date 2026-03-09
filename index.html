@@ -3182,6 +3182,26 @@ async function takeFacingPhoto(shelfId){
 
 }
 
+function initFacingShelves(){
+
+const shelves = document.querySelectorAll(".shelf");
+
+shelves.forEach(el=>{
+
+el.onclick = ()=>{
+
+const id = el.dataset.id;
+
+takeFacingPhoto(id);
+
+el.classList.add("done");
+
+};
+
+});
+
+}
+
 </script>
 
 <input id="employeeImportFile"
