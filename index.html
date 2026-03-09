@@ -3383,7 +3383,6 @@ return div;
 
 }
 
-async function takeFacingPhoto(shelfId){
 
   let cameraStream=null;
 let currentShelf=null;
@@ -3411,25 +3410,6 @@ showDQMessage("カメラが使えない");
 
 }
 
-function initFacingShelves(){
-
-const shelves = document.querySelectorAll(".shelf");
-
-shelves.forEach(el=>{
-
-el.onclick = ()=>{
-
-const id = el.dataset.id;
-
-takeFacingPhoto(id);
-
-el.classList.add("done");
-
-};
-
-});
-
-}
 
 function initFacingShelves(){
 
