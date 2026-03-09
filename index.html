@@ -915,6 +915,7 @@ border-top:none;
       <button onclick="showTab('adminQuests')">クエスト</button>
       <button onclick="showTab('adminRewards')">景品</button>
       <button onclick="showTab('adminData')">データ</button>
+      <button onclick="showTab('adminFacing')">前陳評価</button>
 <button onclick="showTab('adminHistory')">履歴</button>
 <button onclick="showTab('adminVersion')">バージョン</button>
     </div>
@@ -1619,6 +1620,9 @@ function showTab(id){
   }
 if(id === "adminVersion"){
   renderVersionInfo();
+}
+if(id==="adminFacing"){
+renderFacingReview();
 }
 }
 
@@ -3537,6 +3541,66 @@ document.getElementById("cameraModal").classList.add("hidden");
 
 document.getElementById("cameraPreview").style.display="none";
 document.getElementById("cameraVideo").style.display="block";
+
+}
+
+function renderFacingReview(){
+
+const container=document.getElementById("facingReviewList");
+
+if(!container) return;
+
+container.innerHTML="";
+
+const today=todayStr();
+
+const records=state.facing.records[today]||[];
+
+records.forEach((r,i)=>{
+
+const row=document.createElement("div");
+row.className="card";
+
+row.innerHTML=`
+
+<div>棚：${r.shelf}</div>
+<div>撮影者：${state.employees[r.employee]?.name||r.employee}</div>
+<div>${r.time}</div>
+
+<img src="${r.image}" style="width:100%;margin-top:6px">
+
+<div style="margin-top:6px">
+
+評価
+<select onchange="setFacingScore(${i},this.value)">
+
+<option value="">--</option>
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+
+</select>
+
+</div>
+
+<textarea
+placeholder="コメント"
+onchange="setFacingComment(${i},this.value)"
+style="width:100%;margin-top:4px"></textarea>
+
+`;
+
+container.appendChild(row);
+
+});
 
 }
 
