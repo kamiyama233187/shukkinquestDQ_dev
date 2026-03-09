@@ -3385,36 +3385,29 @@ return div;
 
 async function takeFacingPhoto(shelfId){
 
-  try{
+  let cameraStream=null;
+let currentShelf=null;
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:"environment" }
-    });
+async function takeFacingPhoto(shelfId){
 
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    await video.play();
+currentShelf=shelfId;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+try{
 
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video,0,0);
+cameraStream=await navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment"}
+});
 
-    const data = canvas.toDataURL("image/jpeg",0.8);
+const video=document.getElementById("cameraVideo");
+video.srcObject=cameraStream;
 
-    stream.getTracks().forEach(t=>t.stop());
+document.getElementById("cameraModal").classList.remove("hidden");
 
-    saveFacingRecord(shelfId,data);
+}catch(e){
 
-    showDQMessage("前陳写真を保存した！");
+showDQMessage("カメラが使えない");
 
-  }catch(e){
-
-    showDQMessage("カメラが使えない");
-
-  }
+}
 
 }
 
@@ -3458,6 +3451,57 @@ el.classList.add("done");
 
 }
 
+function capturePhoto(){
+
+const video=document.getElementById("cameraVideo");
+const canvas=document.getElementById("cameraCanvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+
+ctx.drawImage(video,0,0);
+
+const data=canvas.toDataURL("image/jpeg",0.8);
+
+document.getElementById("cameraPreview").src=data;
+document.getElementById("cameraPreview").style.display="block";
+video.style.display="none";
+
+}
+
+function savePhoto(){
+
+const img=document.getElementById("cameraPreview").src;
+
+saveFacingRecord(currentShelf,img);
+
+closeCamera();
+
+showDQMessage("前陳写真を保存した！");
+
+}
+
+function retakePhoto(){
+
+document.getElementById("cameraPreview").style.display="none";
+document.getElementById("cameraVideo").style.display="block";
+
+}
+
+function closeCamera(){
+
+if(cameraStream){
+cameraStream.getTracks().forEach(t=>t.stop());
+}
+
+document.getElementById("cameraModal").classList.add("hidden");
+
+document.getElementById("cameraPreview").style.display="none";
+document.getElementById("cameraVideo").style.display="block";
+
+}
+
 </script>
 
 <input id="employeeImportFile"
@@ -3482,6 +3526,32 @@ el.classList.add("done");
     </div>
 
   </div>
+</div>
+
+<div id="cameraModal" class="modal hidden">
+
+  <div class="modalBox">
+
+    <video id="cameraVideo" autoplay playsinline style="width:100%"></video>
+
+    <canvas id="cameraCanvas" style="display:none"></canvas>
+
+    <img id="cameraPreview" style="width:100%;display:none">
+
+    <div class="modalActions">
+
+      <button onclick="capturePhoto()">撮影</button>
+
+      <button onclick="savePhoto()">保存</button>
+
+      <button onclick="retakePhoto()">撮り直し</button>
+
+      <button onclick="closeCamera()">キャンセル</button>
+
+    </div>
+
+  </div>
+
 </div>
 
 </body>
