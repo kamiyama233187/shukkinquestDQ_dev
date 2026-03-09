@@ -485,6 +485,8 @@ if(code && data.employees && data.employees[code] && data.employees[code].player
 player = data.employees[code].player;
 }
 
+state.player = player;
+
 let currentBranch = null;
 let walkFrame = 0;
 let direction = 2; 
