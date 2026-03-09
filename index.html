@@ -456,6 +456,56 @@ transform:scale(0.95);
 
 }
 
+#facingBoard{
+
+display:flex;
+
+gap:10px;
+
+overflow-x:auto;
+
+padding-top:10px;
+
+}
+
+.column{
+
+display:flex;
+
+flex-direction:column;
+
+gap:6px;
+
+}
+
+.shelf{
+
+border:2px solid #fff;
+
+padding:8px;
+
+min-width:70px;
+
+text-align:center;
+
+background:#111;
+
+font-size:12px;
+
+}
+
+.shelf.big{
+
+height:80px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
 </style>
 </head>
 <body>
@@ -563,48 +613,74 @@ transform:scale(0.95);
   </div>
   
   <!-- ===== 前陳タブ ===== -->
- <div id="empFacing" class="card hidden">
+<div id="empFacing" class="card hidden">
 
 <h3>前陳チェック</h3>
 
-<div id="facingLayout">
+<div id="facingBoard">
 
-<div class="facingColumn">
+<!-- 左OP -->
+<div class="column">
 
-<div class="shelf" data-id="rice">米飯</div>
-<div class="shelf" data-id="dessert">デザート</div>
-<div class="shelf" data-id="yogurt">ヨーグルト</div>
-<div class="shelf" data-id="milk">乳飲料</div>
-
-</div>
-
-<div class="facingColumn">
-
-<div class="shelf" data-id="poke_snack">ポケ菓子</div>
-<div class="shelf" data-id="poke_season">調味料</div>
+<div class="shelf">米飯</div>
+<div class="shelf">OP①</div>
+<div class="shelf">OP②</div>
+<div class="shelf">OP③</div>
+<div class="shelf">OP④</div>
+<div class="shelf">OP⑤</div>
+<div class="shelf">OP⑥</div>
+<div class="shelf">OP⑦</div>
 
 </div>
 
-<div class="facingColumn">
+<!-- デザート -->
+<div class="column">
 
-<div class="shelf" data-id="nl_sweets">NL菓子</div>
-<div class="shelf" data-id="nl_original">オリジナル菓子</div>
-<div class="shelf" data-id="nl_snack">スナック</div>
-
-</div>
-
-<div class="facingColumn">
-
-<div class="shelf" data-id="fried">駄菓子</div>
-<div class="shelf" data-id="cupnoodle">カップ麺</div>
-<div class="shelf" data-id="soup">スープ</div>
+<div class="shelf big">デザート</div>
+<div class="shelf">ヨーグルト</div>
+<div class="shelf">乳飲料</div>
+<div class="shelf">平台①</div>
 
 </div>
 
-<div class="facingColumn">
+<!-- ポケ菓子 -->
+<div class="column">
 
-<div class="shelf" data-id="daily">日用品</div>
-<div class="shelf" data-id="books">本</div>
+<div class="shelf big">ポケ菓子</div>
+<div class="shelf">調味料</div>
+<div class="shelf">平台②</div>
+
+</div>
+
+<!-- NL -->
+<div class="column">
+
+<div class="shelf">NL菓子</div>
+<div class="shelf">オリジナル菓子</div>
+<div class="shelf">ベーカリー</div>
+<div class="shelf">スナック</div>
+<div class="shelf">珍味</div>
+
+</div>
+
+<!-- カップ麺 -->
+<div class="column">
+
+<div class="shelf">スープ</div>
+<div class="shelf">カップ麺</div>
+<div class="shelf">無印良品</div>
+
+</div>
+
+<!-- 日用品 -->
+<div class="column">
+
+<div class="shelf">日用品①</div>
+<div class="shelf">日用品②</div>
+<div class="shelf">日用品③</div>
+<div class="shelf">日用品④</div>
+<div class="shelf">日用品⑤</div>
+<div class="shelf">本</div>
 
 </div>
 
