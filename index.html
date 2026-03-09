@@ -816,10 +816,11 @@ border-top:none;
   </div>
   
   <!-- ===== 前陳タブ ===== -->
-  <div id="facingProgress"></div>
 <div id="empFacing" class="card hidden">
 
 <h3>前陳チェック</h3>
+
+ <div id="facingProgress"></div>
 
 <!-- 上段棚 -->
 <div id="facingBoard">
@@ -3129,13 +3130,10 @@ playCursor();
   });
   if(id==="empFacing"){
 initFacingShelves();
+renderFacingProgress();
 }
 
   document.getElementById(id).classList.remove("hidden");
-  
-  if(id==="empFacing"){
-initFacingShelves();
-}
 }
 
 if ("serviceWorker" in navigator) {
