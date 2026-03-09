@@ -1104,10 +1104,17 @@ checkSugorokuTitles(code);
   if(!isShiftDay()){
     showDQMessage("きょうは やすみのひ だった！");
   }
- const saved = JSON.parse(localStorage.getItem("shukkinQuestData_v3"));
+ const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
 if(saved?.player){
-state.employees[code].player = saved.player;
+
+state.employees[code].player = {
+body: saved.player.body || 0,
+legs: saved.player.legs || 0,
+armor: saved.player.armor || 0,
+hair: saved.player.hair || 0
+};
+
 save();
 }
 }
