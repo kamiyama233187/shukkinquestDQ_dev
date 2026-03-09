@@ -770,6 +770,7 @@ border-top:none;
     <div class="row">
       <button onclick="showEmpTab('empQuest')">クエスト</button>
       <button onclick="showEmpTab('empFacing')">前陳</button>
+      <button onclick="showEmpTab('empFeedback')">フィードバック</button>
       <button onclick="showEmpTab('empShop')">ポイント交換</button>
       <button onclick="showEmpTab('empRanking')">ランキング</button>
 <button onclick="showEmpTab('empTitles')">称号</button>
@@ -822,6 +823,14 @@ border-top:none;
 
  <div id="facingProgress"></div>
 
+<!-- ===== フィードバック ===== -->
+<div id="empFeedback" class="card hidden">
+
+<h3>前陳フィードバック</h3>
+
+<div id="feedbackList" class="list"></div>
+
+</div>
 <!-- 上段棚 -->
 <div id="facingBoard">
 
@@ -1413,7 +1422,10 @@ shelf:shelfId,
 area:area,
 employee:currentUser,
 image:image,
-time:new Date().toLocaleTimeString()
+time:new Date().toLocaleTimeString(),
+score:null,
+comment:"",
+pointGranted:false
 
 });
 
@@ -3128,7 +3140,7 @@ function showEmpTab(id){
 
 playCursor();
 
-const tabs = ["empQuest","empShop","empRanking","empTitles","empFacing"];
+const tabs = ["empQuest","empShop","empRanking","empTitles","empFacing","empFeedback"];
 
 tabs.forEach(t=>{
 const el = document.getElementById(t);
@@ -3144,7 +3156,9 @@ restoreFacingState();
 renderFacingProgress();
 
 }
-
+if(id==="empFeedback"){
+renderFacingFeedback();
+}
 }
 
 if ("serviceWorker" in navigator) {
@@ -3750,8 +3764,58 @@ container.appendChild(row);
 function setFacingScore(index,val){
 
 const today=todayStr();
+const rec = state.facing.records[today][index];
 
-state.facing.records[today][index].score=parseInt(val);
+rec.score = parseInt(val);
+
+/* ===== ポイント処理 ===== */
+
+if(rec.pointGranted) {
+save();
+return;
+}
+
+const workers = getTodayWorkers();  workers.forEach(code=>{  const emp = state.employees[code];  if(!emp) return;  emp.totalPoints += pt; emp.totalEarned += pt;  });
+
+if(!emp){
+save();
+return;
+}
+
+/* 0〜3は無効 */
+
+if(rec.score <= 3){
+
+showDQMessage("前陳未達成（ポイントなし）");
+
+rec.pointGranted=true;
+save();
+return;
+
+}
+
+/* ポイント付与 */
+
+let pt=0;
+
+if(rec.score <=6){
+pt=5;
+}
+
+if(rec.score <=8 && rec.score >=7){
+pt=20;
+}
+
+if(rec.score >=9){
+pt=50;
+}
+
+emp.totalPoints += pt;
+emp.totalEarned += pt;
+
+rec.pointGranted=true;
+
+showDQMessage(`前陳評価 ${rec.score} → ${pt}pt付与`);
 
 save();
 
@@ -3872,6 +3936,63 @@ showDQMessage(
 );
 
 });
+
+}
+
+function renderFacingFeedback(){
+
+const container = document.getElementById("feedbackList");
+if(!container) return;
+
+container.innerHTML="";
+
+const records = state.facing.records || {};
+
+Object.values(records).flat().forEach(r=>{
+
+if(r.employee !== currentUser) return;
+if(r.score === undefined) return;
+
+const row=document.createElement("div");
+row.className="card";
+
+row.innerHTML=`
+
+<div><strong>${r.area}</strong></div>
+
+<img src="${r.image}" style="width:100%;margin-top:6px">
+
+<div style="margin-top:6px">
+評価：${r.score}
+</div>
+
+<div>
+${r.comment || ""}
+</div>
+
+`;
+
+container.appendChild(row);
+
+});
+
+}
+
+function getTodayWorkers(){
+
+const arr=[];
+
+Object.entries(state.employees).forEach(([code,emp])=>{
+
+currentUser = code;
+
+if(isShiftDay()){
+arr.push(code);
+}
+
+});
+
+return arr;
 
 }
 
