@@ -1104,9 +1104,10 @@ checkSugorokuTitles(code);
   if(!isShiftDay()){
     showDQMessage("きょうは やすみのひ だった！");
   }
-  if(!state.employees[code].player){
-state.employees[code].player =
-JSON.parse(localStorage.getItem("shukkinQuestData_v3"))?.player || {};
+ const saved = JSON.parse(localStorage.getItem("shukkinQuestData_v3"));
+
+if(saved?.player){
+state.employees[code].player = saved.player;
 save();
 }
 }
