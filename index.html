@@ -406,6 +406,56 @@ input{
   pointer-events:none;
 }
 
+#facingLayout{
+
+display:flex;
+
+gap:10px;
+
+overflow-x:auto;
+
+padding-top:10px;
+
+}
+
+.facingColumn{
+
+display:flex;
+
+flex-direction:column;
+
+gap:8px;
+
+}
+
+.shelf{
+
+border:2px solid #fff;
+
+padding:10px;
+
+min-width:80px;
+
+text-align:center;
+
+cursor:pointer;
+
+background:#111;
+
+}
+
+.shelf.done{
+
+background:#065f46;
+
+}
+
+.shelf:active{
+
+transform:scale(0.95);
+
+}
+
 </style>
 </head>
 <body>
@@ -466,6 +516,7 @@ input{
   <div class="card">
     <div class="row">
       <button onclick="showEmpTab('empQuest')">クエスト</button>
+      <button onclick="showEmpTab('empFacing')">前陳</button>
       <button onclick="showEmpTab('empShop')">ポイント交換</button>
       <button onclick="showEmpTab('empRanking')">ランキング</button>
 <button onclick="showEmpTab('empTitles')">称号</button>
@@ -510,6 +561,56 @@ input{
     <button onclick="logout()">ログアウト</button>
 
   </div>
+  
+  <!-- ===== 前陳タブ ===== -->
+ <div id="empFacing" class="card hidden">
+
+<h3>前陳チェック</h3>
+
+<div id="facingLayout">
+
+<div class="facingColumn">
+
+<div class="shelf" data-id="rice">米飯</div>
+<div class="shelf" data-id="dessert">デザート</div>
+<div class="shelf" data-id="yogurt">ヨーグルト</div>
+<div class="shelf" data-id="milk">乳飲料</div>
+
+</div>
+
+<div class="facingColumn">
+
+<div class="shelf" data-id="poke_snack">ポケ菓子</div>
+<div class="shelf" data-id="poke_season">調味料</div>
+
+</div>
+
+<div class="facingColumn">
+
+<div class="shelf" data-id="nl_sweets">NL菓子</div>
+<div class="shelf" data-id="nl_original">オリジナル菓子</div>
+<div class="shelf" data-id="nl_snack">スナック</div>
+
+</div>
+
+<div class="facingColumn">
+
+<div class="shelf" data-id="fried">駄菓子</div>
+<div class="shelf" data-id="cupnoodle">カップ麺</div>
+<div class="shelf" data-id="soup">スープ</div>
+
+</div>
+
+<div class="facingColumn">
+
+<div class="shelf" data-id="daily">日用品</div>
+<div class="shelf" data-id="books">本</div>
+
+</div>
+
+</div>
+
+</div>
 
 </section>
 
@@ -2655,12 +2756,15 @@ function showDQMessage(text, duration = 3000){
 function showEmpTab(id){
 playCursor();
 
-  const tabs = ["empQuest","empShop","empRanking","empTitles"];
+  cconst tabs = ["empQuest","empShop","empRanking","empTitles","empFacing"];
 
   tabs.forEach(t=>{
     const el = document.getElementById(t);
     if(el) el.classList.add("hidden");
   });
+  if(id==="empFacing"){
+initFacingShelves();
+}
 
   document.getElementById(id).classList.remove("hidden");
 }
