@@ -668,8 +668,8 @@ if(!currentUser){
   location.href = "index.html";
 }
 
-if(!state.sugoroku){
-  state.sugoroku = {
+if(!state.employees[currentUser].sugoroku){
+  state.employees[currentUser].sugoroku = {
     position: 0,
     stage: 1,
     laps: 0,
@@ -685,9 +685,9 @@ inCave: false
   save();
 }
 
-if(state.sugoroku.hp === undefined){
-  state.sugoroku.hp = 100;
-  state.sugoroku.maxHp = 100;
+if(state.employees[currentUser].sugoroku.hp === undefined){
+  state.employees[currentUser].sugoroku.hp = 100;
+  state.employees[currentUser].sugoroku.maxHp = 100;
 }
 
 function save(){
@@ -711,7 +711,7 @@ function rollDice(){
   const emp = state.employees[currentUser];
   if(!emp) return;
 
-  if(!devMode && emp.sugorokuLastPlayDate === today){
+  if(!devMode && state.employees[currentUser].sugoroku.lastPlayDate === today){
     showMessage("今日はもうプレイできない！");
     return;
   }
@@ -757,7 +757,7 @@ let steps = 0;
 const moveInterval = setInterval(()=>{
 
 const currentTile =
-state.sugoroku.tiles[state.sugoroku.position];
+state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position];
 
 if(!currentTile){
 clearInterval(moveInterval);
@@ -784,7 +784,7 @@ clearInterval(moveInterval);
 player.classList.remove("walk");
 
 const tileType =
-state.sugoroku.tiles[state.sugoroku.position]?.type;
+state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position]?.type;
 
 setTimeout(()=>{
 handleEvent(tileType);
@@ -795,8 +795,8 @@ return;
 }
 nextPos = currentTile.next[0];
 
-const current = state.sugoroku.tiles[state.sugoroku.position];
-const next = state.sugoroku.tiles[nextPos];
+const current = state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position];
+const next = state.employees[currentUser].sugoroku.tiles[nextPos];
 
 if(next.x > current.x) direction = 3;   // 右
 else if(next.x < current.x) direction = 1; // 左
@@ -804,13 +804,13 @@ else if(next.y > current.y) direction = 2; // 下
 else if(next.y < current.y) direction = 0; // 上
 
 // マップ終端安全処理
-if(nextPos >= state.sugoroku.tiles.length){
+if(nextPos >= state.employees[currentUser].sugoroku.tiles.length){
 
 clearInterval(moveInterval);
 player.classList.remove("walk");
 
 const tileType =
-state.sugoroku.tiles[state.sugoroku.position]?.type;
+state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position]?.type;
 
 setTimeout(()=>{
 handleEvent(tileType);
@@ -820,7 +820,7 @@ return;
 
 }
 
-state.sugoroku.position = nextPos;
+state.employees[currentUser].sugoroku.position = nextPos;
 
 steps++;
 updateWalkFrame();
@@ -837,7 +837,7 @@ clearInterval(moveInterval);
 player.classList.remove("walk");
 
 const tileType =
-state.sugoroku.tiles[state.sugoroku.position]?.type;
+state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position]?.type;
 
 setTimeout(()=>{
 
@@ -845,7 +845,7 @@ handleEvent(tileType);
 
 },500);
 
-emp.sugorokuLastPlayDate = today;
+state.employees[currentUser].sugoroku.lastPlayDate = today;
 save();
 
 }
@@ -875,10 +875,10 @@ mapView.classList.remove(
 "stage1","stage2","stage3","stage4","stage5"
 );
 
-mapView.classList.add("stage"+state.sugoroku.stage);
+mapView.classList.add("stage"+state.employees[currentUser].sugoroku.stage);
 
-document.getElementById("stageNum").textContent = state.sugoroku.stage;
-document.getElementById("pos").textContent = state.sugoroku.position;
+document.getElementById("stageNum").textContent = state.employees[currentUser].sugoroku.stage;
+document.getElementById("pos").textContent = state.employees[currentUser].sugoroku.position;
 
 const emp = state.employees[currentUser];
 const earned = emp.totalEarned || 0;
@@ -908,7 +908,7 @@ const mapLayer = document.getElementById("mapLayer");
 map.innerHTML = "";
 mapLayer.querySelectorAll(".path").forEach(p=>p.remove());
 
-const tiles = state.sugoroku.tiles;
+const tiles = state.employees[currentUser].sugoroku.tiles;
 
 /* マス生成 */
 
@@ -918,7 +918,7 @@ const tile = document.createElement("div");
 tile.className="tile";
 tile.dataset.index=i;
 
-if(i===state.sugoroku.position) tile.classList.add("active");
+if(i===state.employees[currentUser].sugoroku.position) tile.classList.add("active");
 if(tileData.type==="goal") tile.classList.add("goal");
 
 switch(tileData.type){
@@ -1025,7 +1025,7 @@ mapLayer.appendChild(path);
 =================== */
 
 const player=document.getElementById("player");
-const tileData = tiles[state.sugoroku.position];
+const tileData = tiles[state.employees[currentUser].sugoroku.position];
 
 if(!tileData) return;
 
@@ -1061,18 +1061,18 @@ HP
 =================== */
 
 const hpPercent =
-(state.sugoroku.hp/state.sugoroku.maxHp)*100;
+(state.employees[currentUser].sugoroku.hp/state.employees[currentUser].sugoroku.maxHp)*100;
 
 document.getElementById("hpBar").style.width =
 hpPercent+"%";
 
 // HP0チェック
-if(state.sugoroku.hp <= 0){
+if(state.employees[currentUser].sugoroku.hp <= 0){
 
 showMessage("💀 力尽きてしまった…");
 
-state.sugoroku.hp = state.sugoroku.maxHp;
-state.sugoroku.position = 0;
+state.employees[currentUser].sugoroku.hp = state.employees[currentUser].sugoroku.maxHp;
+state.employees[currentUser].sugoroku.position = 0;
 
 save();
 setTimeout(render,500);
@@ -1115,10 +1115,10 @@ mapLayer.appendChild(tree);
 
 function generateMap(){
 
-const stage = state.sugoroku.stage;
+const stage = state.employees[currentUser].sugoroku.stage;
 const path = STAGE_PATH[stage];
 
-state.sugoroku.tiles = [];
+state.employees[currentUser].sugoroku.tiles = [];
 
 path.forEach((pos,i)=>{
 
@@ -1134,7 +1134,7 @@ type="goal";
 next=[];
 }
 
-state.sugoroku.tiles.push({
+state.employees[currentUser].sugoroku.tiles.push({
 x:pos[0],
 y:pos[1],
 type:type,
@@ -1153,7 +1153,7 @@ for(let i=0;i<hiddenCount;i++){
 
 const pos = Math.floor(Math.random()*(path.length-10))+5;
 
-const tile = state.sugoroku.tiles[pos];
+const tile = state.employees[currentUser].sugoroku.tiles[pos];
 
 if(!tile || tile.type!=="none") continue;
 
@@ -1176,13 +1176,13 @@ while(used.some(p=>Math.abs(p-pos)<6));
 
 used.push(pos);
 
-const tile = state.sugoroku.tiles[pos];
+const tile = state.employees[currentUser].sugoroku.tiles[pos];
 
 if(!tile || tile.type!=="none") continue;
 
 tile.type="branch";
 
-const branchIndex = state.sugoroku.tiles.length;
+const branchIndex = state.employees[currentUser].sugoroku.tiles.length;
 
 /* 分岐ルート */
 
@@ -1191,7 +1191,7 @@ const by = tile.y+1;
 
 const safeNext = Math.min(pos+4, path.length-1);
 
-state.sugoroku.tiles.push({
+state.employees[currentUser].sugoroku.tiles.push({
 x:bx,
 y:by,
 type:"none",
@@ -1217,8 +1217,8 @@ types[Math.floor(Math.random()*types.length)]
 
 const goalIndex = path.length - 1;
 
-if(state.sugoroku.tiles[goalIndex]){
-state.sugoroku.tiles[goalIndex].next = [];
+if(state.employees[currentUser].sugoroku.tiles[goalIndex]){
+state.employees[currentUser].sugoroku.tiles[goalIndex].next = [];
 }
 
 /* マスイベントランダム */
@@ -1241,7 +1241,7 @@ rateMod.rare *= 2;
 rateMod.plus *= 1.5;
 }
 
-state.sugoroku.tiles.forEach(tile=>{
+state.employees[currentUser].sugoroku.tiles.forEach(tile=>{
 
 if(tile.type!=="none") return;
 
@@ -1260,7 +1260,7 @@ else if(r<rateMod.plus+rateMod.minus+rateMod.rare+rateMod.heal+rateMod.boss+rate
 function generateCave(){
 let x = 0;
 let y = 0;
-  state.sugoroku.tiles = [];
+  state.employees[currentUser].sugoroku.tiles = [];
 
   for(let i=0;i<20;i++){
 x += 1;
@@ -1270,7 +1270,7 @@ if(Math.random() < 0.4){
 }
 
     if(i === 19){
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"exit",
         next:[],
 x:x,
@@ -1282,7 +1282,7 @@ x:x,
     const rand = Math.random();
 
     if(rand < 0.15){
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"treasure",
         next:[i+1],
 x:x,
@@ -1290,7 +1290,7 @@ x:x,
       });
     }
     else if(rand < 0.35){
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"minus",
         next:[i+1],
 x:x,
@@ -1298,7 +1298,7 @@ x:x,
       });
     }
     else if(rand < 0.55){
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"boss",
         next:[i+1],
 x:x,
@@ -1306,7 +1306,7 @@ x:x,
       });
     }
     else if(rand < 0.70){
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"rare",
         next:[i+1],
 x:x,
@@ -1314,7 +1314,7 @@ x:x,
       });
     }
     else{
-      state.sugoroku.tiles.push({
+      state.employees[currentUser].sugoroku.tiles.push({
         type:"none",
         next:[i+1],
 x:x,
@@ -1340,15 +1340,15 @@ if(type === "goal"){
 
 showMessage("🏁 ゴール！");
 
-state.sugoroku.stage++;
+state.employees[currentUser].sugoroku.stage++;
 
-if(state.sugoroku.stage>5){
-state.sugoroku.stage=1;
+if(state.employees[currentUser].sugoroku.stage>5){
+state.employees[currentUser].sugoroku.stage=1;
 state.employees[currentUser].sugorokuLaps++;
 }
 
 generateMap();
-state.sugoroku.position=0;
+state.employees[currentUser].sugoroku.position=0;
 currentRouteEffect = null;
 
 save();
@@ -1466,13 +1466,13 @@ if(type === "exit"){
 
   showMessage("🚪 洞窟を脱出した！");
 
-  state.sugoroku.inCave = false;
+  state.employees[currentUser].sugoroku.inCave = false;
 
-  const returnPos = state.sugoroku.caveReturnPos ?? 0;
+  const returnPos = state.employees[currentUser].sugoroku.caveReturnPos ?? 0;
 
   generateMap();
 
-  state.sugoroku.position = returnPos;
+  state.employees[currentUser].sugoroku.position = returnPos;
 
   save();
   render();
@@ -1490,11 +1490,11 @@ if(type === "cave"){
 
     showMessage("🕳 洞窟に入った！");
 
-state.sugoroku.caveReturnPos = state.sugoroku.position;
+state.employees[currentUser].sugoroku.caveReturnPos = state.employees[currentUser].sugoroku.position;
 
-state.sugoroku.inCave = true;
+state.employees[currentUser].sugoroku.inCave = true;
 generateCave();
-state.sugoroku.position = 0;
+state.employees[currentUser].sugoroku.position = 0;
 
 save();
 render();
@@ -1511,7 +1511,7 @@ render();
 
 if(type === "branch"){
 
-  currentBranch = state.sugoroku.tiles[state.sugoroku.position];
+  currentBranch = state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position];
 
   const routes = currentBranch.routeType || ["normal","normal"];
 
@@ -1539,7 +1539,7 @@ mapLayer.classList.add("zoomFocus");
 
 if(type === "boss"){
 
-const stage = state.sugoroku.stage;
+const stage = state.employees[currentUser].sugoroku.stage;
 const data = STAGE_DATA[stage];
 
   const chance = Math.random();
@@ -1562,9 +1562,9 @@ const data = STAGE_DATA[stage];
     emp.totalPoints -= 20;
     if(emp.totalPoints < 0) emp.totalPoints = 0;
 
-state.sugoroku.hp -= data.bossDamage;
-if(state.sugoroku.hp < 0){
-  state.sugoroku.hp = 0;
+state.employees[currentUser].sugoroku.hp -= data.bossDamage;
+if(state.employees[currentUser].sugoroku.hp < 0){
+  state.employees[currentUser].sugoroku.hp = 0;
 }
 
     document.body.classList.add("bossFlashLose");
@@ -1582,13 +1582,13 @@ render();
 
 if(type === "heal"){
 
-const stage = state.sugoroku.stage;
+const stage = state.employees[currentUser].sugoroku.stage;
 const data = STAGE_DATA[stage];
 
-  state.sugoroku.hp += data.healAmount;
+  state.employees[currentUser].sugoroku.hp += data.healAmount;
 
-  if(state.sugoroku.hp > state.sugoroku.maxHp){
-    state.sugoroku.hp = state.sugoroku.maxHp;
+  if(state.employees[currentUser].sugoroku.hp > state.employees[currentUser].sugoroku.maxHp){
+    state.employees[currentUser].sugoroku.hp = state.employees[currentUser].sugoroku.maxHp;
   }
 
   showMessage("❤ HPが" + data.healAmount + "回復した！");
@@ -1649,14 +1649,14 @@ function devRoll(){
 
   if(isNaN(val)) return;
 
-  state.sugoroku.position += val;
+  state.employees[currentUser].sugoroku.position += val;
   
- const length = state.sugoroku.tiles.length;
+ const length = state.employees[currentUser].sugoroku.tiles.length;
  
 
-if(state.sugoroku.position >= length){
-    state.sugoroku.position = 0;
-    state.sugoroku.laps += 1;
+if(state.employees[currentUser].sugoroku.position >= length){
+    state.employees[currentUser].sugoroku.position = 0;
+    state.employees[currentUser].sugoroku.laps += 1;
   }
 
   render();
@@ -1665,21 +1665,21 @@ if(state.sugoroku.position >= length){
 
 function forceGoal(){
 
-const length = state.sugoroku.tiles.length;
+const length = state.employees[currentUser].sugoroku.tiles.length;
 
-state.sugoroku.position = length - 1;
+state.employees[currentUser].sugoroku.position = length - 1;
 
   render();
   save();
 }
 
 function warpTo(num){
-  state.sugoroku.position = num;
+  state.employees[currentUser].sugoroku.position = num;
   render();
   save();
 }
 
-if(!state.sugoroku.tiles || state.sugoroku.tiles.length === 0){
+if(!state.employees[currentUser].sugoroku.tiles || state.employees[currentUser].sugoroku.tiles.length === 0){
   generateMap();
   save();
 }
@@ -1693,7 +1693,7 @@ function devTrigger(type){
   if(!emp) return;
 
   if(type === "goal"){
-    state.sugoroku.position = state.sugoroku.tiles.length - 1;
+    state.employees[currentUser].sugoroku.position = state.employees[currentUser].sugoroku.tiles.length - 1;
     render();
     showMessage("🏁 強制ゴール！");
     return;
@@ -1704,14 +1704,14 @@ function devTrigger(type){
 
 function devHp(amount){
 
-  state.sugoroku.hp += amount;
+  state.employees[currentUser].sugoroku.hp += amount;
 
-  if(state.sugoroku.hp > state.sugoroku.maxHp){
-    state.sugoroku.hp = state.sugoroku.maxHp;
+  if(state.employees[currentUser].sugoroku.hp > state.employees[currentUser].sugoroku.maxHp){
+    state.employees[currentUser].sugoroku.hp = state.employees[currentUser].sugoroku.maxHp;
   }
 
-  if(state.sugoroku.hp < 0){
-    state.sugoroku.hp = 0;
+  if(state.employees[currentUser].sugoroku.hp < 0){
+    state.employees[currentUser].sugoroku.hp = 0;
   }
 
   render();
@@ -1719,7 +1719,7 @@ function devHp(amount){
 }
 
 function devFullHp(){
-  state.sugoroku.hp = state.sugoroku.maxHp;
+  state.employees[currentUser].sugoroku.hp = state.employees[currentUser].sugoroku.maxHp;
   render();
   save();
 }
@@ -1728,7 +1728,7 @@ function regenerateMap(){
 
   generateMap();
 
-  state.sugoroku.position = 0;
+  state.employees[currentUser].sugoroku.position = 0;
 
   showMessage("🗺 マップを再生成した！");
 
@@ -1792,7 +1792,7 @@ showMessage("🎁 宝の匂いがする！");
 
   const nextPos = currentBranch.next[index];
 
-  state.sugoroku.position = nextPos;
+  state.employees[currentUser].sugoroku.position = nextPos;
 
   document.getElementById("branchUI").style.display = "none";
 
@@ -1803,7 +1803,7 @@ mapLayer.classList.remove("zoomFocus");
 
   render();
 
- const tile = state.sugoroku.tiles[state.sugoroku.position];
+ const tile = state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position];
 
 if(tile?.type === "branch"){
   handleEvent("branch");
@@ -1811,7 +1811,7 @@ if(tile?.type === "branch"){
 }
 
 const tileType =
-  state.sugoroku.tiles[state.sugoroku.position]?.type;
+  state.employees[currentUser].sugoroku.tiles[state.employees[currentUser].sugoroku.position]?.type;
 
 setTimeout(()=>{
   handleEvent(tileType);
@@ -1838,10 +1838,10 @@ const ctx = canvas.getContext("2d");
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-const tiles = state.sugoroku.tiles;
+const tiles = state.employees[currentUser].sugoroku.tiles;
 if(!tiles || tiles.length===0) return;
 
-const p = tiles[state.sugoroku.position];
+const p = tiles[state.employees[currentUser].sugoroku.position];
 if(!p) return;
 
 /* 最大座標取得 */
