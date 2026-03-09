@@ -1029,6 +1029,14 @@ border-top:none;
 </div>
 <hr style="margin:20px 0;">
 
+<div id="adminFacing" class="card hidden">
+
+<h3>前陳写真評価</h3>
+
+<div id="facingReviewList" class="list"></div>
+
+</div>
+
 <div id="adminHistory" class="card hidden">
 
   <h3>日別履歴</h3>
@@ -1609,7 +1617,8 @@ function showEmployee(){
 }
 
 function showTab(id){
- ["adminEmployees","adminQuests","adminRewards","adminData","adminHistory","adminVersion"]
+
+ ["adminEmployees","adminQuests","adminRewards","adminData","adminFacing","adminHistory","adminVersion"]
 .forEach(t=>{
     const el=document.getElementById(t);
     if(el) el.classList.add("hidden");
@@ -3601,6 +3610,26 @@ style="width:100%;margin-top:4px"></textarea>
 container.appendChild(row);
 
 });
+
+}
+
+function setFacingScore(index,val){
+
+const today=todayStr();
+
+state.facing.records[today][index].score=parseInt(val);
+
+save();
+
+}
+
+function setFacingComment(index,val){
+
+const today=todayStr();
+
+state.facing.records[today][index].comment=val;
+
+save();
 
 }
 
