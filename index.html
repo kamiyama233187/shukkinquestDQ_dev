@@ -8,6 +8,60 @@
 <title>出勤クエスト_dev</title>
 
 <style>
+#facingSheet{
+
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
+margin-top:10px;
+
+}
+
+.column{
+
+display:flex;
+flex-direction:column;
+gap:6px;
+
+}
+
+.shelf{
+
+border:2px solid #fff;
+padding:8px;
+text-align:center;
+font-size:12px;
+background:#111;
+cursor:pointer;
+
+}
+
+.shelf.big{
+
+height:80px;
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+#facingBottom{
+
+margin-top:20px;
+
+display:grid;
+grid-template-columns:repeat(10,1fr);
+
+gap:6px;
+
+}
+
+.shelf.wide{
+
+padding:12px;
+font-size:13px;
+
+}
 .rankChar{
 width:64px;
 height:64px;
@@ -831,11 +885,10 @@ border-top:none;
 <div id="feedbackList" class="list"></div>
 
 </div>
-<!-- 上段棚 -->
-<div id="facingBoard">
+<div id="facingSheet">
 
 <!-- OP -->
-<div class="facingColumn">
+<div class="column">
 <div class="shelf" data-id="op1">OP①</div>
 <div class="shelf" data-id="op2">OP②</div>
 <div class="shelf" data-id="op3">OP③</div>
@@ -846,68 +899,69 @@ border-top:none;
 </div>
 
 <!-- 米飯 -->
-<div class="facingColumn">
+<div class="column">
 <div class="shelf big" data-id="rice">米飯</div>
 </div>
 
 <!-- デザート -->
-<div class="facingColumn">
-<div class="shelf" data-id="dessert">デザート</div>
-<div class="shelf" data-id="yogurt">ヨーグルト</div>
-<div class="shelf" data-id="milk">乳飲料</div>
-<div class="shelf" data-id="platform1">平台①</div>
+<div class="column">
+<div class="shelf">デザート</div>
+<div class="shelf">ヨーグルト</div>
+<div class="shelf">乳飲料</div>
+<div class="shelf">平台①</div>
 </div>
 
-<!-- ポケ菓子 -->
-<div class="facingColumn">
-<div class="shelf" data-id="poke_snack">ポケ菓子</div>
-<div class="shelf" data-id="poke_season">調味料</div>
-<div class="shelf" data-id="platform2">平台②</div>
+<!-- ポケ -->
+<div class="column">
+<div class="shelf">ポケ菓子</div>
+<div class="shelf">調味料</div>
+<div class="shelf">平台②</div>
 </div>
 
 <!-- NL -->
-<div class="facingColumn">
-<div class="shelf" data-id="nl_sweets">NL菓子</div>
-<div class="shelf" data-id="nl_original">オリジナル菓子</div>
-<div class="shelf" data-id="nl_bakery">ベーカリー</div>
-<div class="shelf" data-id="nl_snack">スナック</div>
-<div class="shelf" data-id="rare">珍味</div>
+<div class="column">
+<div class="shelf">NL菓子</div>
+<div class="shelf">オリジナル</div>
+<div class="shelf">ベーカリー</div>
+<div class="shelf">スナック</div>
+<div class="shelf">珍味</div>
 </div>
 
 <!-- カップ麺 -->
-<div class="facingColumn">
-<div class="shelf" data-id="soup">スープ</div>
-<div class="shelf" data-id="cup">カップ麺</div>
-<div class="shelf" data-id="muji">無印良品</div>
+<div class="column">
+<div class="shelf">スープ</div>
+<div class="shelf">カップ麺</div>
+<div class="shelf">無印</div>
 </div>
 
 <!-- 日用品 -->
-<div class="facingColumn">
-<div class="shelf" data-id="daily1">日用品①</div>
-<div class="shelf" data-id="daily2">日用品②</div>
-<div class="shelf" data-id="daily3">日用品③</div>
-<div class="shelf" data-id="daily4">日用品④</div>
-<div class="shelf" data-id="daily5">日用品⑤</div>
-<div class="shelf" data-id="book">本</div>
+<div class="column">
+<div class="shelf">日用品①</div>
+<div class="shelf">日用品②</div>
+<div class="shelf">日用品③</div>
+<div class="shelf">日用品④</div>
+<div class="shelf">日用品⑤</div>
+<div class="shelf">本</div>
 </div>
 
 </div>
 
-<!-- 下段（リーチイン） -->
+<!-- 下段 -->
+
 <div id="facingBottom">
 
-<div class="shelf wide" data-id="frozen1">冷食①</div>
-<div class="shelf wide" data-id="frozen2">冷食②</div>
-<div class="shelf wide" data-id="frozen3">冷食③</div>
+<div class="shelf wide">冷食①</div>
+<div class="shelf wide">冷食②</div>
+<div class="shelf wide">冷食③</div>
 
-<div class="shelf wide" data-id="alcohol1">酒①</div>
-<div class="shelf wide" data-id="alcohol2">酒②</div>
-<div class="shelf wide" data-id="alcohol3">酒③</div>
+<div class="shelf wide">酒①</div>
+<div class="shelf wide">酒②</div>
+<div class="shelf wide">酒③</div>
 
-<div class="shelf wide" data-id="softdrink1">ソフドリ①</div>
-<div class="shelf wide" data-id="softdrink2">ソフドリ②</div>
-<div class="shelf wide" data-id="softdrink3">ソフドリ③</div>
-<div class="shelf wide" data-id="softdrink4">ソフドリ④</div>
+<div class="shelf wide">ソフドリ①</div>
+<div class="shelf wide">ソフドリ②</div>
+<div class="shelf wide">ソフドリ③</div>
+<div class="shelf wide">ソフドリ④</div>
 
 </div>
 
@@ -3581,14 +3635,14 @@ const area = SHELF_AREA[id];
 if(isAreaDone(area)){
 
 if(confirm("このエリアは撮影済みです。撮り直しますか？")){
-takeFacingPhoto(id);
+showFacingAction(id);
 }
 
 return;
 
 }
 
-takeFacingPhoto(id);
+showFacingAction(id);
 
 };
 
@@ -3724,7 +3778,10 @@ row.innerHTML=`
 <div>棚：${r.shelf}</div>
 <div>${r.time}</div>
 
-<img src="${r.image}" style="width:100%;margin-top:6px">
+${r.image
+? `<img src="${r.image}" style="width:100%">`
+: `<div style="padding:20px;background:#222">📋 仮達成（写真なし）</div>`
+}
 
 <div style="margin-top:6px">
 
@@ -3758,7 +3815,9 @@ style="width:100%;margin-top:4px"></textarea>
 container.appendChild(row);
 
 });
-
+<button onclick="invalidateFacing(${r.index})">
+不正（ポイント取消）
+</button>
 }
 
 function setFacingScore(index,val){
@@ -3960,7 +4019,10 @@ row.innerHTML=`
 
 <div><strong>${r.area}</strong></div>
 
-<img src="${r.image}" style="width:100%;margin-top:6px">
+${r.image
+? `<img src="${r.image}" style="width:100%">`
+: `<div style="padding:20px;background:#222">📋 仮達成</div>`
+}
 
 <div style="margin-top:6px">
 評価：${r.score}
@@ -3993,6 +4055,42 @@ arr.push(code);
 });
 
 return arr;
+
+}
+
+function showFacingAction(shelfId){
+
+const area = SHELF_AREA[shelfId];
+
+const result = confirm(
+"前陳操作\n\nOK → 写真撮影\nキャンセル → 仮達成"
+);
+
+if(result){
+
+takeFacingPhoto(shelfId);
+
+}else{
+
+saveFacingRecord(shelfId,null);
+
+showDQMessage("仮達成を記録した");
+
+}
+
+}
+
+function invalidateFacing(index){
+
+const today = todayStr();
+const rec = state.facing.records[today][index];
+
+rec.score = 0;
+rec.pointGranted = true;
+
+showDQMessage("前陳無効にした");
+
+save();
 
 }
 
