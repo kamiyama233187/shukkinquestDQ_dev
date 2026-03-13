@@ -1225,6 +1225,22 @@ function playBattleEnd(){
 }
 /* ================= UTIL ================= */
 
+function convertScoreToAILabel(score){
+
+score = Number(score);
+
+if(score <= 2){
+return "BAD";
+}
+
+if(score <= 4){
+return "NORMAL";
+}
+
+return "GOOD";
+
+}
+
 function saveFacingRecord(shelfId,image){
 
 const date = todayStr();
@@ -3581,18 +3597,32 @@ ${r.image
 <div style="margin-top:10px">
 評価
 <select id="score_${r.index}">
-  <option value="">--</option>
-  <option value="0" ${r.score===0 ? "selected" : ""}>0</option>
-  <option value="1" ${r.score===1 ? "selected" : ""}>1</option>
-  <option value="2" ${r.score===2 ? "selected" : ""}>2</option>
-  <option value="3" ${r.score===3 ? "selected" : ""}>3</option>
-  <option value="4" ${r.score===4 ? "selected" : ""}>4</option>
-  <option value="5" ${r.score===5 ? "selected" : ""}>5</option>
-  <option value="6" ${r.score===6 ? "selected" : ""}>6</option>
-  <option value="7" ${r.score===7 ? "selected" : ""}>7</option>
-  <option value="8" ${r.score===8 ? "selected" : ""}>8</option>
-  <option value="9" ${r.score===9 ? "selected" : ""}>9</option>
-  <option value="10" ${r.score===10 ? "selected" : ""}>10</option>
+<option value="">--</option>
+
+<option value="0" ${r.score===0 ? "selected" : ""}>
+0 (T_T)
+</option>
+
+<option value="1" ${r.score===1 ? "selected" : ""}>
+1 もっとがんばりましょう...！
+</option>
+
+<option value="2" ${r.score===2 ? "selected" : ""}>
+2 もう少しがんばりましょう...！
+</option>
+
+<option value="3" ${r.score===3 ? "selected" : ""}>
+3 合格点！
+</option>
+
+<option value="4" ${r.score===4 ? "selected" : ""}>
+4 ほぼ完璧！
+</option>
+
+<option value="5" ${r.score===5 ? "selected" : ""}>
+5 完璧！！
+</option>
+
 </select>
 </div>
 
@@ -3652,6 +3682,8 @@ if(oldScore === null && rec.score !== null){
 image:rec.image,
 
 score:rec.score,
+
+label: convertScoreToAILabel(rec.score),
 
 comment:rec.comment,
 
