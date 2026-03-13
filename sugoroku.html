@@ -662,6 +662,33 @@ let fullMap = false;
 
 const walkSE = new Audio("footsteps.mp3");
 walkSE.volume = 0.3;
+/* =================
+   サウンド
+================= */
+
+const cursorSE = new Audio("cursor.mp3");
+const diceSE = new Audio("dice.mp3");
+const caveSE = new Audio("enter.mp3");
+const plusSE = new Audio("plus.mp3");
+const minusSE = new Audio("minus.mp3");
+const rareSE = new Audio("rare.mp3");
+const bossSE = new Audio("boss.mp3");
+const healSE = new Audio("heal.mp3");
+const goalSE = new Audio("battle_end.mp3");
+const treasureSE = new Audio("treasure.mp3");
+
+cursorSE.volume = 0.5;
+diceSE.volume = 0.6;
+
+plusSE.volume = 0.6;
+minusSE.volume = 0.6;
+rareSE.volume = 0.7;
+bossSE.volume = 0.7;
+healSE.volume = 0.6;
+goalSE.volume = 0.7;
+treasureSE.volume = 0.7;
+caveSE.volume = 0.7;
+
 
 if(!currentUser){
   alert("ログインしてからプレイしてください");
@@ -722,6 +749,9 @@ function rollDice(){
 
   let roll = 1;
   let count = 0;
+
+diceSE.currentTime = 0;
+diceSE.play();
 
   const diceInterval = setInterval(()=>{
 
@@ -1337,7 +1367,8 @@ function handleEvent(type){
   const emp = state.employees[currentUser];
 
 if(type === "goal"){
-
+goalSE.currentTime=0;
+goalSE.play();
 showMessage("🏁 ゴール！");
 
 state.employees[currentUser].sugoroku.stage++;
@@ -1379,6 +1410,9 @@ handleEvent("minus");
 
 if(type === "plus"){
 
+plusSE.currentTime=0;
+plusSE.play();
+
   state.employees[currentUser].totalPoints += 10;
   state.employees[currentUser].totalEarned += 10;
 
@@ -1388,6 +1422,9 @@ if(type === "plus"){
 }
 
 if(type === "minus"){
+
+minusSE.currentTime=0;
+minusSE.play();
 
   state.employees[currentUser].totalPoints -= 5;
 
@@ -1402,6 +1439,8 @@ if(type === "minus"){
 
 if(type === "rare"){
 
+rareSE.currentTime=0;
+rareSE.play();
   if(currentUser && state.employees[currentUser]){
 
     const chance = Math.random();
@@ -1430,7 +1469,8 @@ if(type === "rare"){
 }
 
 if(type === "treasure"){
-
+treasureSE.currentTime = 0;
+treasureSE.play();
   showMessage("🎁 宝箱を発見！");
 
   const rand = Math.random();
@@ -1463,7 +1503,8 @@ if(type === "treasure"){
 }
 
 if(type === "exit"){
-
+caveSE.currentTime = 0;
+caveSE.play();
   showMessage("🚪 洞窟を脱出した！");
 
   state.employees[currentUser].sugoroku.inCave = false;
@@ -1481,7 +1522,8 @@ if(type === "exit"){
 if(type === "cave"){
 
   showMessage("🕳 洞窟を発見した！");
-
+caveSE.currentTime = 0;
+caveSE.play();
   setTimeout(()=>{
 
     const enter = confirm("洞窟に入りますか？");
@@ -1538,7 +1580,8 @@ mapLayer.classList.add("zoomFocus");
 
 
 if(type === "boss"){
-
+bossSE.currentTime=0;
+bossSE.play();
 const stage = state.employees[currentUser].sugoroku.stage;
 const data = STAGE_DATA[stage];
 
@@ -1581,7 +1624,8 @@ render();
 }
 
 if(type === "heal"){
-
+healSE.currentTime=0;
+healSE.play();
 const stage = state.employees[currentUser].sugoroku.stage;
 const data = STAGE_DATA[stage];
 
