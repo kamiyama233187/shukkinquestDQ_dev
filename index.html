@@ -876,7 +876,7 @@ border-top:none;
 <h3>前陳チェック</h3>
 
  <div id="facingProgress"></div>
-
+</div>
 <!-- ===== フィードバック ===== -->
 <div id="empFeedback" class="card hidden">
 
@@ -4032,7 +4032,7 @@ const myRecords = Object.entries(records)
     return list;
 
   })
-  .filter(r => r.employee === currentUser && r.score != null);
+  .filter(r => String(r.employee) === String(currentUser) && r.score != null);
 
 if(!myRecords.length){
   container.innerHTML = "<div>まだ前陳フィードバックはありません。</div>";
